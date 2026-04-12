@@ -1,0 +1,12 @@
+# IDE
+**/.vscode/
+**/.idea/
+
+# Java build
+**/target/
+
+# logs
+*.log
+
+# OS
+.DS_Store
