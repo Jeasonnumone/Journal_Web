@@ -8,6 +8,7 @@ class BackendApplicationTests {
 
     @Test
     void contextLoads() {
+        System.out.println(System.getenv("wsl_mysql_username"));
     }
 
 }

@@ -10,16 +10,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("journal")
-public class Journal {
+@TableName("journal_category")
+public class JournalCategory {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    private String title;
-    private String author;
-    private Long categoryId;
-    private String cover;
+    private String name;
     private String description;
-    private String publisher;
-    private String issn;
 }
