@@ -12,6 +12,7 @@
           class="search-input"
           @input="search"
         />
+        <button class="search-btn" @click="search">🔍</button>
       </div>
       
       <!-- 期刊分类 -->
@@ -188,20 +189,31 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
 }
 
 .app-header {
   text-align: center;
   margin-bottom: 30px;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .app-header h1 {
   font-size: 36px;
   color: #333;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 30px;
 }
 
@@ -211,6 +223,28 @@ onMounted(async () => {
   font-size: 16px;
   border: 2px solid #ddd;
   border-radius: 5px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  border-color: #aa3bff;
+  box-shadow: 0 0 0 3px rgba(170, 59, 255, 0.1);
+}
+
+.search-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.search-btn:hover {
+  border-color: #aa3bff;
+  color: #aa3bff;
 }
 
 .category-container {
@@ -224,21 +258,25 @@ onMounted(async () => {
   padding: 10px 20px;
   font-size: 14px;
   border: 2px solid #ddd;
-  border-radius: 5px;
+  border-radius: 20px;
   background-color: #fff;
   cursor: pointer;
   transition: all 0.3s;
+  font-weight: bold;
 }
 
 .category-btn:hover {
   border-color: #aa3bff;
   color: #aa3bff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .category-btn.active {
   background-color: #aa3bff;
   color: #fff;
   border-color: #aa3bff;
+  box-shadow: 0 2px 5px rgba(170, 59, 255, 0.3);
 }
 
 .journal-grid {
@@ -254,6 +292,8 @@ onMounted(async () => {
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .journal-card:hover {
@@ -261,10 +301,19 @@ onMounted(async () => {
   transform: translateY(-5px);
 }
 
-.journal-cover img {
+.journal-cover {
   width: 100%;
   height: 300px;
-  object-fit: cover;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.journal-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .journal-info {
@@ -327,11 +376,18 @@ onMounted(async () => {
   font-size: 18px;
   color: #666;
   padding: 50px 0;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .journal-details {
   max-width: 800px;
   margin: 0 auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn {
@@ -355,17 +411,27 @@ onMounted(async () => {
   gap: 30px;
 }
 
-.detail-cover img {
+.detail-cover {
   width: 300px;
   height: 400px;
-  object-fit: cover;
+  overflow: hidden;
   border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+.detail-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .detail-info h2 {
   font-size: 28px;
   color: #333;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .detail-author {
@@ -402,6 +468,11 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .detail-content {
     flex-direction: column;
+  }
+
+  .detail-cover {
+    width: 100%;
+    height: auto;
   }
 
   .detail-cover img {
