@@ -1,6 +1,7 @@
 # IDE
 **/.vscode/
 **/.idea/
+.trae/
 
 # Java build
 **/target/
