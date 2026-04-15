@@ -33,7 +33,7 @@
     <main v-if="!selectedJournal">
       <div class="journal-grid">
         <div 
-          v-for="journal in paginatedJournals" 
+          v-for="journal in journals" 
           :key="journal.id" 
           class="journal-card"
           @click="showDetails(journal)"
@@ -50,14 +50,14 @@
       </div>
       
       <!-- 分页控件 -->
-      <div class="pagination" v-if="totalPages > 1">
+      <div class="pagination" v-if="totalPages > 1 || currentPage > 1">
         <button class="page-btn" @click="prevPage" :disabled="currentPage === 1">上一页</button>
         <span class="page-info">第 {{ currentPage }} 页，共 {{ totalPages }} 页</span>
         <button class="page-btn" @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
       </div>
       
       <!-- 无结果提示 -->
-      <div class="no-results" v-if="paginatedJournals.length === 0">
+      <div class="no-results" v-if="journals.length === 0 && total === 0">
         <p>未找到相关期刊</p>
       </div>
     </main>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import natureImg from './assets/nature.jpg'
 import scienceImg from './assets/science.jpg'
 
@@ -93,12 +93,16 @@ const selectedCategory = ref('全部')
 const selectedJournal = ref(null)
 const currentPage = ref(1)
 const itemsPerPage = ref(6)
+const total = ref(0)
 
 // 期刊分类
 const categories = ref([])
 
 // 期刊数据
 const journals = ref([])
+
+// 计算总页数
+const totalPages = ref(0)
 
 // 后端API地址
 const API_BASE_URL = 'http://localhost:8081'
@@ -119,10 +123,13 @@ const getCategories = async () => {
 // 获取期刊数据
 const getJournals = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/journals?keyword=${keyword.value}&category=${selectedCategory.value}`)
+    const response = await fetch(`${API_BASE_URL}/api/journals?keyword=${keyword.value}&category=${selectedCategory.value}&page=${currentPage.value}&size=${itemsPerPage.value}`)
     const result = await response.json()
     if (result.code === 200) {
-      journals.value = result.data
+      const pageData = result.data
+      journals.value = pageData.records
+      total.value = pageData.total
+      totalPages.value = Math.ceil(pageData.total / pageData.size)
     }
   } catch (error) {
     console.error('获取期刊失败:', error)
@@ -152,20 +159,11 @@ const backToGrid = () => {
   selectedJournal.value = null
 }
 
-// 分页相关计算
-const paginatedJournals = computed(() => {
-  const startIndex = (currentPage.value - 1) * itemsPerPage.value
-  return journals.value.slice(startIndex, startIndex + itemsPerPage.value)
-})
-
-const totalPages = computed(() => {
-  return Math.ceil(journals.value.length / itemsPerPage.value)
-})
-
 // 上一页
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
+    getJournals()
   }
 }
 
@@ -173,6 +171,7 @@ const prevPage = () => {
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
+    getJournals()
   }
 }
 

@@ -1,54 +1,51 @@
 package cn.deru.backend.controller;
 
 import cn.deru.backend.model.Journal;
-import cn.deru.backend.model.Result;
+import cn.deru.backend.model.PageResult;
 import cn.deru.backend.service.JournalService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
+import cn.deru.backend.model.Result;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/journals")
-@Api(tags = "期刊管理")
+@CrossOrigin(origins = "*")
 public class JournalController {
+    private final JournalService journalService;
 
-    @Autowired
-    private JournalService journalService;
+    public JournalController(JournalService journalService) {
+        this.journalService = journalService;
+    }
 
-    // 获取所有期刊
+    // 获取所有期刊（分页）
     @GetMapping
-    @ApiOperation(value = "获取期刊列表", notes = "根据关键词和分类筛选期刊")
-    public Result<List<Journal>> getAllJournals(
-            @ApiParam(name = "keyword", value = "搜索关键词", required = false) @RequestParam(value = "keyword", defaultValue = "") String keyword,
-            @ApiParam(name = "category", value = "分类筛选", required = false, defaultValue = "全部") @RequestParam(value = "category", defaultValue = "全部") String category) {
-        List<Journal> journals;
-        if (!keyword.isEmpty()) {
-            journals = journalService.searchAndFilterJournals(keyword, category);
-        } else {
-            journals = journalService.getJournalsByCategory(category);
-        }
-        return Result.success(journals);
+    public Result<PageResult<Journal>> getJournals(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "6") int size
+    ) {
+        PageResult<Journal> pageResult = journalService.getJournalsPageable(keyword, category, page, size);
+        return Result.success(pageResult);
     }
 
-    // 获取期刊详情
-    @GetMapping("/{id}")
-    @ApiOperation(value = "获取期刊详情", notes = "根据ID获取期刊详细信息")
-    public Result<Journal> getJournalById(@ApiParam(name = "id", value = "期刊ID", required = true) @PathVariable Long id) {
-        return journalService.getJournalById(id)
-                .map(Result::success)
-                .orElse(Result.error(404, "期刊不存在"));
-    }
-
-    // 获取所有分类
+    // 获取期刊分类
     @GetMapping("/categories")
-    @ApiOperation(value = "获取所有分类", notes = "获取系统中所有的期刊分类")
-    public Result<List<String>> getAllCategories() {
+    public Result<List<String>> getCategories() {
         List<String> categories = journalService.getAllCategories();
         return Result.success(categories);
+    }
+
+    // 根据ID获取期刊
+    @GetMapping("/{id}")
+    public Result<Journal> getJournalById(@PathVariable Long id) {
+        Optional<Journal> journalOptional = journalService.getJournalById(id);
+        if (journalOptional.isPresent()) {
+            return Result.success(journalOptional.get());
+        } else {
+            return Result.error(404, "期刊不存在");
+        }
     }
 }

@@ -2,6 +2,7 @@ package cn.deru.backend.service;
 
 import cn.deru.backend.model.Journal;
 import cn.deru.backend.model.JournalCategory;
+import cn.deru.backend.model.PageResult;
 import cn.deru.backend.repository.JournalCategoryRepository;
 import cn.deru.backend.repository.JournalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,5 +69,44 @@ public class JournalService {
                 .collect(Collectors.toList());
         categoryNames.add(0, "全部");
         return categoryNames;
+    }
+
+    // ==================== 分页查询方法 ====================
+
+    // 分页查询期刊
+    public PageResult<Journal> getJournalsPageable(String keyword, String categoryName, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Journal> records;
+        long total;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            if (categoryName != null && !categoryName.isEmpty() && !"全部".equals(categoryName)) {
+                JournalCategory category = journalCategoryRepository.findByName(categoryName);
+                if (category != null) {
+                    records = journalRepository.findByCategoryIdAndTitleContainingIgnoreCasePageable(category.getId(), keyword, offset, size);
+                    total = journalRepository.countByCategoryIdAndTitleContainingIgnoreCase(category.getId(), keyword);
+                } else {
+                    records = new ArrayList<>();
+                    total = 0;
+                }
+            } else {
+                records = journalRepository.findByTitleContainingIgnoreCasePageable(keyword, offset, size);
+                total = journalRepository.countByTitleContainingIgnoreCase(keyword);
+            }
+        } else if (categoryName != null && !categoryName.isEmpty() && !"全部".equals(categoryName)) {
+            JournalCategory category = journalCategoryRepository.findByName(categoryName);
+            if (category != null) {
+                records = journalRepository.findByCategoryIdPageable(category.getId(), offset, size);
+                total = journalRepository.countByCategoryId(category.getId());
+            } else {
+                records = new ArrayList<>();
+                total = 0;
+            }
+        } else {
+            records = journalRepository.findAllPageable(offset, size);
+            total = journalRepository.countAll();
+        }
+
+        return new PageResult<>(records, total, page, size);
     }
 }
