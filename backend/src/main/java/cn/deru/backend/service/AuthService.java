@@ -3,6 +3,7 @@ package cn.deru.backend.service;
 import cn.deru.backend.dto.LoginRequest;
 import cn.deru.backend.dto.LoginResponse;
 import cn.deru.backend.dto.RegisterRequest;
+import cn.deru.backend.dto.UserDTO;
 import cn.deru.backend.model.User;
 import cn.deru.backend.repository.UserRepository;
 import cn.deru.backend.util.JwtUtil;
@@ -24,7 +25,7 @@ public class AuthService {
     }
     
     // 注册
-    public User register(RegisterRequest request) {
+    public UserDTO register(RegisterRequest request) {
         // 检查用户名是否存在
         if (userRepository.findByUsername(request.getUsername()) != null) {
             throw new RuntimeException("Username already exists");
@@ -37,7 +38,7 @@ public class AuthService {
         user.setRole("USER");
         
         userRepository.insert(user);
-        return user;
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
     }
     
     // 登录
@@ -71,7 +72,8 @@ public class AuthService {
     }
     
     // 获取当前登录用户
-    public User getCurrentUser(String username) {
-        return userRepository.findByUsername(username);
+    public UserDTO getCurrentUser(String username) {
+        User user = userRepository.findByUsername(username);
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
     }
 }

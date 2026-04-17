@@ -3,8 +3,8 @@ package cn.deru.backend.controller;
 import cn.deru.backend.dto.LoginRequest;
 import cn.deru.backend.dto.LoginResponse;
 import cn.deru.backend.dto.RegisterRequest;
+import cn.deru.backend.dto.UserDTO;
 import cn.deru.backend.model.Result;
-import cn.deru.backend.model.User;
 import cn.deru.backend.service.AuthService;
 import cn.deru.backend.util.UserContext;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +22,8 @@ public class AuthController {
     
     // 注册
     @PostMapping("/register")
-    public Result<User> register(@RequestBody RegisterRequest request) {
-        User user = authService.register(request);
+    public Result<UserDTO> register(@RequestBody RegisterRequest request) {
+        UserDTO user = authService.register(request);
         return Result.success(user);
     }
     
@@ -36,13 +36,13 @@ public class AuthController {
     
     // 获取当前登录用户
     @GetMapping("/me")
-    public Result<User> getCurrentUser() {
+    public Result<UserDTO> getCurrentUser() {
         String username = UserContext.getUsername();
         if (username == null) {
             return Result.error(400, "未登录");
         }
-
-        User user = authService.getCurrentUser(username);
+        
+        UserDTO user = authService.getCurrentUser(username);
         return Result.success(user);
     }
 }
