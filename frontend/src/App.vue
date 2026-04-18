@@ -161,7 +161,6 @@ const backToHome = () => {
 // 退出登录
 const handleLogout = () => {
   localStorage.removeItem('token')
-  localStorage.removeItem('user')
   currentUser.value = null
   currentPage.value = 'home'
 }
@@ -249,16 +248,12 @@ onMounted(async () => {
       const result = await getCurrentUser()
       if (result.code === 200) {
         currentUser.value = result.data
-        localStorage.setItem('user', JSON.stringify(result.data))
-        currentPage.value = 'home'
       } else {
         localStorage.removeItem('token')
-        localStorage.removeItem('user')
       }
     } catch (error) {
       console.error('获取用户信息失败:', error)
       localStorage.removeItem('token')
-      localStorage.removeItem('user')
     }
   }
 })

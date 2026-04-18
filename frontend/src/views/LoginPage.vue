@@ -68,7 +68,6 @@ const handleLogin = async () => {
     
     if (result.code === 200) {
       localStorage.setItem('token', result.data.token)
-      localStorage.setItem('user', JSON.stringify(result.data.user))
       emit('login-success', result.data.user)
     } else {
       errorMessage.value = result.message || '登录失败'
