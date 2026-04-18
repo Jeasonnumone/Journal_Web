@@ -25,8 +25,7 @@ const request = async (url, options = {}) => {
   if (response.status === 401) {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    window.location.href = '/login'
-    return null
+    throw new Error('Unauthorized')
   }
   
   return result
