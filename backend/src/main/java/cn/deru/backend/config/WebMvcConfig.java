@@ -18,9 +18,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 // 拦截所有需要认证的接口
                 .addPathPatterns("/api/**")
-                // 放行登录、注册接口
-//                .excludePathPatterns("/api/auth/register, /api/auth/login");
-                .excludePathPatterns("/api/auth/register", "/api/auth/login");
+                // 放行登录、注册接口以及期刊浏览接口
+                .excludePathPatterns("/api/auth/register", "/api/auth/login", "/api/journals/**");
     }
     
     @Override

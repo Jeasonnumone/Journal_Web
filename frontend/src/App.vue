@@ -5,6 +5,7 @@
       v-if="currentPage === 'login'" 
       @login-success="handleLoginSuccess" 
       @go-to-register="currentPage = 'register'"
+      @go-to-home="backToHome"
     />
     
     <!-- 注册页面 -->
@@ -12,6 +13,7 @@
       v-else-if="currentPage === 'register'" 
       @register-success="handleRegisterSuccess" 
       @go-to-login="currentPage = 'login'"
+      @go-to-home="backToHome"
     />
     
     <!-- 主页面 -->
@@ -21,8 +23,13 @@
         <div class="header-top">
           <h1>📚 德儒教育</h1>
           <div class="user-info">
-            <span class="username">{{ currentUser?.username }}</span>
-            <button class="logout-btn" @click="handleLogout">退出</button>
+            <template v-if="currentUser">
+              <span class="username">{{ currentUser.username }}</span>
+              <button class="logout-btn" @click="handleLogout">退出</button>
+            </template>
+            <template v-else>
+              <button class="login-nav-btn" @click="currentPage = 'login'">登录/注册</button>
+            </template>
           </div>
         </div>
         
@@ -71,10 +78,10 @@
         </div>
         
         <!-- 分页控件 -->
-        <div class="pagination" v-if="totalPages > 1 || currentPage > 1">
-          <button class="page-btn" @click="prevPage" :disabled="currentPage === 1">上一页</button>
-          <span class="page-info">第 {{ currentPage }} 页，共 {{ totalPages }} 页</span>
-          <button class="page-btn" @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+        <div class="pagination" v-if="totalPages > 1 || pageNum > 1">
+          <button class="page-btn" @click="prevPage" :disabled="pageNum === 1">上一页</button>
+          <span class="page-info">第 {{ pageNum }} 页，共 {{ totalPages }} 页</span>
+          <button class="page-btn" @click="nextPage" :disabled="pageNum === totalPages">下一页</button>
         </div>
         
         <!-- 无结果提示 -->
@@ -111,7 +118,7 @@ import RegisterPage from './views/RegisterPage.vue'
 import { getCategories, getJournals, getCurrentUser } from './api/index.js'
 
 // 页面状态
-const currentPage = ref('login')
+const currentPage = ref('home')
 
 // 用户信息
 const currentUser = ref(null)
@@ -146,12 +153,17 @@ const handleRegisterSuccess = () => {
   currentPage.value = 'login'
 }
 
+// 返回主页
+const backToHome = () => {
+  currentPage.value = 'home'
+}
+
 // 退出登录
 const handleLogout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   currentUser.value = null
-  currentPage.value = 'login'
+  currentPage.value = 'home'
 }
 
 // 获取期刊分类
@@ -225,8 +237,11 @@ const nextPage = () => {
   }
 }
 
-// 页面加载时检查登录状态
+// 页面加载时检查登录状态并加载数据
 onMounted(async () => {
+  await fetchCategories()
+  await fetchJournals()
+  
   const token = localStorage.getItem('token')
   
   if (token) {
@@ -236,10 +251,7 @@ onMounted(async () => {
         currentUser.value = result.data
         localStorage.setItem('user', JSON.stringify(result.data))
         currentPage.value = 'home'
-        await fetchCategories()
-        await fetchJournals()
       } else {
-        // token无效，清除本地存储
         localStorage.removeItem('token')
         localStorage.removeItem('user')
       }
@@ -309,6 +321,22 @@ onMounted(async () => {
 
 .logout-btn:hover {
   background-color: #e74c3c;
+  color: #fff;
+}
+
+.login-nav-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 2px solid #667eea;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.login-nav-btn:hover {
+  background-color: #667eea;
   color: #fff;
 }
 

@@ -1,6 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-container">
+      <button class="back-home-btn" @click="goToHome">← 返回首页</button>
       <h1 class="login-title">📚 德儒教育</h1>
       <h2 class="login-subtitle">登录</h2>
       
@@ -56,7 +57,7 @@ const loginForm = ref({
 const loading = ref(false)
 const errorMessage = ref('')
 
-const emit = defineEmits(['login-success'])
+const emit = defineEmits(['login-success', 'go-to-register', 'go-to-home'])
 
 const handleLogin = async () => {
   loading.value = true
@@ -82,6 +83,10 @@ const handleLogin = async () => {
 const goToRegister = () => {
   emit('go-to-register')
 }
+
+const goToHome = () => {
+  emit('go-to-home')
+}
 </script>
 
 <style scoped>
@@ -101,6 +106,26 @@ const goToRegister = () => {
   width: 100%;
   max-width: 400px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.back-home-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.back-home-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
 }
 
 .login-title {
