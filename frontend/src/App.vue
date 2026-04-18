@@ -1,81 +1,103 @@
 <template>
   <div class="journal-app">
-    <!-- 顶部搜索和分类 -->
-    <header class="app-header">
-      <h1>📚 德儒教育</h1>
-      
-      <!-- 搜索框 -->
-      <div class="search-container">
-        <input 
-          v-model="keyword" 
-          placeholder="搜索期刊..." 
-          class="search-input"
-          @input="search"
-        />
-        <button class="search-btn" @click="search">🔍</button>
-      </div>
-      
-      <!-- 期刊分类 -->
-      <div class="category-container">
-        <button 
-          v-for="category in categories" 
-          :key="category"
-          class="category-btn"
-          :class="{ active: selectedCategory === category }"
-          @click="selectCategory(category)"
-        >
-          {{ category }}
-        </button>
-      </div>
-    </header>
+    <!-- 登录页面 -->
+    <LoginPage 
+      v-if="currentPage === 'login'" 
+      @login-success="handleLoginSuccess" 
+      @go-to-register="currentPage = 'register'"
+    />
     
-    <!-- 期刊卡片展示 -->
-    <main v-if="!selectedJournal">
-      <div class="journal-grid">
-        <div 
-          v-for="journal in journals" 
-          :key="journal.id" 
-          class="journal-card"
-          @click="showDetails(journal)"
-        >
-          <div class="journal-cover">
-            <img :src="journal.cover" :alt="journal.title" />
-          </div>
-          <div class="journal-info">
-            <h3 class="journal-title">{{ journal.title }}</h3>
-            <p class="journal-author">作者：{{ journal.author }}</p>
-            <p class="journal-category">{{ journal.category }}</p>
+    <!-- 注册页面 -->
+    <RegisterPage 
+      v-else-if="currentPage === 'register'" 
+      @register-success="handleRegisterSuccess" 
+      @go-to-login="currentPage = 'login'"
+    />
+    
+    <!-- 主页面 -->
+    <div v-else>
+      <!-- 顶部导航栏 -->
+      <header class="app-header">
+        <div class="header-top">
+          <h1>📚 德儒教育</h1>
+          <div class="user-info">
+            <span class="username">{{ currentUser?.username }}</span>
+            <button class="logout-btn" @click="handleLogout">退出</button>
           </div>
         </div>
-      </div>
-      
-      <!-- 分页控件 -->
-      <div class="pagination" v-if="totalPages > 1 || currentPage > 1">
-        <button class="page-btn" @click="prevPage" :disabled="currentPage === 1">上一页</button>
-        <span class="page-info">第 {{ currentPage }} 页，共 {{ totalPages }} 页</span>
-        <button class="page-btn" @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
-      </div>
-      
-      <!-- 无结果提示 -->
-      <div class="no-results" v-if="journals.length === 0 && total === 0">
-        <p>未找到相关期刊</p>
-      </div>
-    </main>
-    
-    <!-- 期刊详情页 -->
-    <div class="journal-details" v-else>
-      <button class="back-btn" @click="backToGrid">← 返回列表</button>
-      <div class="detail-content">
-        <div class="detail-cover">
-          <img :src="selectedJournal.cover" :alt="selectedJournal.title" />
+        
+        <!-- 搜索框 -->
+        <div class="search-container">
+          <input 
+            v-model="keyword" 
+            placeholder="搜索期刊..." 
+            class="search-input"
+          />
+          <button class="search-btn" @click="search">🔍</button>
         </div>
-        <div class="detail-info">
-          <h2>{{ selectedJournal.title }}</h2>
-          <p class="detail-author">作者：{{ selectedJournal.author }}</p>
-          <p class="detail-category">分类：{{ selectedJournal.category }}</p>
-          <p class="detail-description">{{ selectedJournal.description }}</p>
-          <p class="detail-publisher">出版社：{{ selectedJournal.publisher }}</p>
-          <p class="detail-issn">ISSN：{{ selectedJournal.issn }}</p>
+        
+        <!-- 期刊分类 -->
+        <div class="category-container">
+          <button 
+            v-for="category in categories" 
+            :key="category"
+            class="category-btn"
+            :class="{ active: selectedCategory === category }"
+            @click="selectCategory(category)"
+          >
+            {{ category }}
+          </button>
+        </div>
+      </header>
+      
+      <!-- 期刊卡片展示 -->
+      <main v-if="!selectedJournal">
+        <div class="journal-grid">
+          <div 
+            v-for="journal in journals" 
+            :key="journal.id" 
+            class="journal-card"
+            @click="showDetails(journal)"
+          >
+            <div class="journal-cover">
+              <img :src="journal.cover" :alt="journal.title" />
+            </div>
+            <div class="journal-info">
+              <h3 class="journal-title">{{ journal.title }}</h3>
+              <p class="journal-author">作者：{{ journal.author }}</p>
+              <p class="journal-category">{{ journal.category }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 分页控件 -->
+        <div class="pagination" v-if="totalPages > 1 || currentPage > 1">
+          <button class="page-btn" @click="prevPage" :disabled="currentPage === 1">上一页</button>
+          <span class="page-info">第 {{ currentPage }} 页，共 {{ totalPages }} 页</span>
+          <button class="page-btn" @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+        </div>
+        
+        <!-- 无结果提示 -->
+        <div class="no-results" v-if="journals.length === 0 && total === 0">
+          <p>未找到相关期刊</p>
+        </div>
+      </main>
+      
+      <!-- 期刊详情页 -->
+      <div class="journal-details" v-else>
+        <button class="back-btn" @click="backToGrid">← 返回列表</button>
+        <div class="detail-content">
+          <div class="detail-cover">
+            <img :src="selectedJournal.cover" :alt="selectedJournal.title" />
+          </div>
+          <div class="detail-info">
+            <h2>{{ selectedJournal.title }}</h2>
+            <p class="detail-author">作者：{{ selectedJournal.author }}</p>
+            <p class="detail-category">分类：{{ selectedJournal.category }}</p>
+            <p class="detail-description">{{ selectedJournal.description }}</p>
+            <p class="detail-publisher">出版社：{{ selectedJournal.publisher }}</p>
+            <p class="detail-issn">ISSN：{{ selectedJournal.issn }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -84,14 +106,21 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import natureImg from './assets/nature.jpg'
-import scienceImg from './assets/science.jpg'
+import LoginPage from './views/LoginPage.vue'
+import RegisterPage from './views/RegisterPage.vue'
+import { getCategories, getJournals, getCurrentUser } from './api/index.js'
+
+// 页面状态
+const currentPage = ref('login')
+
+// 用户信息
+const currentUser = ref(null)
 
 // 状态管理
 const keyword = ref('')
 const selectedCategory = ref('全部')
 const selectedJournal = ref(null)
-const currentPage = ref(1)
+const pageNum = ref(1)
 const itemsPerPage = ref(6)
 const total = ref(0)
 
@@ -104,14 +133,31 @@ const journals = ref([])
 // 计算总页数
 const totalPages = ref(0)
 
-// 后端API地址
-const API_BASE_URL = 'http://localhost:8081'
+// 登录成功处理
+const handleLoginSuccess = async (user) => {
+  currentUser.value = user
+  currentPage.value = 'home'
+  await fetchCategories()
+  await fetchJournals()
+}
+
+// 注册成功处理
+const handleRegisterSuccess = () => {
+  currentPage.value = 'login'
+}
+
+// 退出登录
+const handleLogout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  currentUser.value = null
+  currentPage.value = 'login'
+}
 
 // 获取期刊分类
-const getCategories = async () => {
+const fetchCategories = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/journals/categories`)
-    const result = await response.json()
+    const result = await getCategories()
     if (result.code === 200) {
       categories.value = result.data
     }
@@ -121,10 +167,14 @@ const getCategories = async () => {
 }
 
 // 获取期刊数据
-const getJournals = async () => {
+const fetchJournals = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/journals?keyword=${keyword.value}&category=${selectedCategory.value}&page=${currentPage.value}&size=${itemsPerPage.value}`)
-    const result = await response.json()
+    const result = await getJournals({
+      keyword: keyword.value,
+      category: selectedCategory.value,
+      page: pageNum.value,
+      size: itemsPerPage.value
+    })
     if (result.code === 200) {
       const pageData = result.data
       journals.value = pageData.records
@@ -138,15 +188,15 @@ const getJournals = async () => {
 
 // 搜索期刊
 const search = async () => {
-  currentPage.value = 1
-  await getJournals()
+  pageNum.value = 1
+  await fetchJournals()
 }
 
 // 选择分类
 const selectCategory = async (category) => {
   selectedCategory.value = category
-  currentPage.value = 1
-  await getJournals()
+  pageNum.value = 1
+  await fetchJournals()
 }
 
 // 显示期刊详情
@@ -161,32 +211,52 @@ const backToGrid = () => {
 
 // 上一页
 const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    getJournals()
+  if (pageNum.value > 1) {
+    pageNum.value--
+    fetchJournals()
   }
 }
 
 // 下一页
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    getJournals()
+  if (pageNum.value < totalPages.value) {
+    pageNum.value++
+    fetchJournals()
   }
 }
 
-// 页面加载时初始化数据
+// 页面加载时检查登录状态
 onMounted(async () => {
-  await getCategories()
-  await getJournals()
+  const token = localStorage.getItem('token')
+  
+  if (token) {
+    try {
+      const result = await getCurrentUser()
+      if (result.code === 200) {
+        currentUser.value = result.data
+        localStorage.setItem('user', JSON.stringify(result.data))
+        currentPage.value = 'home'
+        await fetchCategories()
+        await fetchJournals()
+      } else {
+        // token无效，清除本地存储
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    }
+  }
 })
 </script>
 
 <style scoped>
 .journal-app {
   font-family: 'Arial', sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 20px;
   background-color: #f5f5f5;
   min-height: 100vh;
@@ -201,11 +271,45 @@ onMounted(async () => {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.app-header h1 {
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-top h1 {
   font-size: 36px;
   color: #333;
-  margin-bottom: 20px;
+  margin: 0;
   font-weight: bold;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.username {
+  font-size: 16px;
+  color: #666;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 2px solid #e74c3c;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #e74c3c;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #e74c3c;
+  color: #fff;
 }
 
 .search-container {
