@@ -100,22 +100,18 @@ const handleRegister = async () => {
   loading.value = true
   
   try {
-    const result = await register({
+    await register({
       username: registerForm.value.username,
       email: registerForm.value.email,
       password: registerForm.value.password
     })
     
-    if (result.code === 200) {
-      successMessage.value = '注册成功，请登录'
-      setTimeout(() => {
-        emit('go-to-login')
-      }, 1500)
-    } else {
-      errorMessage.value = result.message || '注册失败'
-    }
+    successMessage.value = '注册成功，请登录'
+    setTimeout(() => {
+      emit('go-to-login')
+    }, 1500)
   } catch (error) {
-    errorMessage.value = '注册失败，请稍后重试'
+    errorMessage.value = error.response?.data?.message || '注册失败，请稍后重试'
   } finally {
     loading.value = false
   }

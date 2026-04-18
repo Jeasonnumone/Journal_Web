@@ -64,16 +64,11 @@ const handleLogin = async () => {
   errorMessage.value = ''
   
   try {
-    const result = await login(loginForm.value)
-    
-    if (result.code === 200) {
-      localStorage.setItem('token', result.data.token)
-      emit('login-success', result.data.user)
-    } else {
-      errorMessage.value = result.message || '登录失败'
-    }
+    const response = await login(loginForm.value)
+    localStorage.setItem('token', response.data.data.token)
+    emit('login-success', response.data.data.user)
   } catch (error) {
-    errorMessage.value = '登录失败，请稍后重试'
+    errorMessage.value = error.response?.data?.message || '登录失败，请稍后重试'
   } finally {
     loading.value = false
   }

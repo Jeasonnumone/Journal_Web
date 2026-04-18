@@ -168,10 +168,8 @@ const handleLogout = () => {
 // 获取期刊分类
 const fetchCategories = async () => {
   try {
-    const result = await getCategories()
-    if (result.code === 200) {
-      categories.value = result.data
-    }
+    const response = await getCategories()
+    categories.value = response.data.data
   } catch (error) {
     console.error('获取分类失败:', error)
   }
@@ -180,18 +178,16 @@ const fetchCategories = async () => {
 // 获取期刊数据
 const fetchJournals = async () => {
   try {
-    const result = await getJournals({
+    const response = await getJournals({
       keyword: keyword.value,
       category: selectedCategory.value,
       page: pageNum.value,
       size: itemsPerPage.value
     })
-    if (result.code === 200) {
-      const pageData = result.data
-      journals.value = pageData.records
-      total.value = pageData.total
-      totalPages.value = Math.ceil(pageData.total / pageData.size)
-    }
+    const pageData = response.data.data
+    journals.value = pageData.records
+    total.value = pageData.total
+    totalPages.value = Math.ceil(pageData.total / pageData.size)
   } catch (error) {
     console.error('获取期刊失败:', error)
   }
@@ -245,12 +241,8 @@ onMounted(async () => {
   
   if (token) {
     try {
-      const result = await getCurrentUser()
-      if (result.code === 200) {
-        currentUser.value = result.data
-      } else {
-        localStorage.removeItem('token')
-      }
+      const response = await getCurrentUser()
+      currentUser.value = response.data.data
     } catch (error) {
       console.error('获取用户信息失败:', error)
       localStorage.removeItem('token')

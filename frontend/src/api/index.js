@@ -1,66 +1,64 @@
+import axios from 'axios'
+
 const API_BASE_URL = 'http://localhost:8081'
 
-// 通用请求方法
-const request = async (url, options = {}) => {
-  const token = localStorage.getItem('token')
-  
-  const defaultHeaders = {
+// 创建 axios 实例
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
     'Content-Type': 'application/json',
+  },
+})
+
+// 请求拦截器 - 自动添加 token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
   }
-  
-  if (token) {
-    defaultHeaders['Authorization'] = `Bearer ${token}`
+)
+
+// 响应拦截器 - 统一处理错误
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      throw new Error('Unauthorized')
+    }
+    return Promise.reject(error)
   }
-  
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  })
-  
-  const result = await response.json()
-  
-  if (response.status === 401) {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    throw new Error('Unauthorized')
-  }
-  
-  return result
-}
+)
 
 // 登录
 export const login = (data) => {
-  return request('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  })
+  return apiClient.post('/api/auth/login', data)
 }
 
 // 注册
 export const register = (data) => {
-  return request('/api/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  })
+  return apiClient.post('/api/auth/register', data)
 }
 
 // 获取当前用户信息
 export const getCurrentUser = () => {
-  return request('/api/auth/me')
+  return apiClient.get('/api/auth/me')
 }
 
 // 获取期刊列表
 export const getJournals = (params = {}) => {
-  const query = new URLSearchParams(params).toString()
-  return request(`/api/journals?${query}`)
+  return apiClient.get('/api/journals', { params })
 }
 
 // 获取期刊分类
 export const getCategories = () => {
-  return request('/api/journals/categories')
+  return apiClient.get('/api/journals/categories')
 }
 
-export default request
+export default apiClient
