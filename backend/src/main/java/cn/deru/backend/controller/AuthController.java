@@ -2,6 +2,8 @@ package cn.deru.backend.controller;
 
 import cn.deru.backend.dto.LoginRequest;
 import cn.deru.backend.dto.LoginResponse;
+import cn.deru.backend.dto.RefreshTokenRequest;
+import cn.deru.backend.dto.RefreshTokenResponse;
 import cn.deru.backend.dto.RegisterRequest;
 import cn.deru.backend.dto.UserDTO;
 import cn.deru.backend.model.Result;
@@ -27,10 +29,17 @@ public class AuthController {
         return Result.success(user);
     }
     
-    // 登录
+    // 登录 - 返回 Access Token 和 Refresh Token
     @PostMapping("/login")
     public Result<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
+        return Result.success(response);
+    }
+    
+    // 刷新 Token
+    @PostMapping("/refresh")
+    public Result<RefreshTokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
+        RefreshTokenResponse response = authService.refreshToken(request.getRefreshToken());
         return Result.success(response);
     }
     

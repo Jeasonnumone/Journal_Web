@@ -10,10 +10,10 @@ const apiClient = axios.create({
   },
 })
 
-// 请求拦截器 - 自动添加 token
+// 请求拦截器 - 自动添加 Access Token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('accessToken')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -29,7 +29,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
+      localStorage.removeItem('accessToken')
       throw new Error('Unauthorized')
     }
     return Promise.reject(error)
@@ -49,6 +49,11 @@ export const register = (data) => {
 // 获取当前用户信息
 export const getCurrentUser = () => {
   return apiClient.get('/api/auth/me')
+}
+
+// 刷新 Token
+export const refreshToken = (refreshToken) => {
+  return apiClient.post('/api/auth/refresh', { refreshToken })
 }
 
 // 获取期刊列表

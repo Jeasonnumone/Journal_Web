@@ -86,7 +86,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 
-const emit = defineEmits(['register-success', 'go-to-login', 'go-to-home'])
+const emit = defineEmits(['register-success', 'show-login', 'back-home'])
 
 const handleRegister = async () => {
   errorMessage.value = ''
@@ -108,7 +108,7 @@ const handleRegister = async () => {
     
     successMessage.value = '注册成功，请登录'
     setTimeout(() => {
-      emit('go-to-login')
+      emit('show-login')
     }, 1500)
   } catch (error) {
     errorMessage.value = error.response?.data?.message || '注册失败，请稍后重试'
@@ -118,11 +118,11 @@ const handleRegister = async () => {
 }
 
 const goToLogin = () => {
-  emit('go-to-login')
+  emit('show-login')
 }
 
 const goToHome = () => {
-  emit('go-to-home')
+  emit('back-home')
 }
 </script>
 

@@ -1,113 +1,104 @@
 <template>
-  <div class="journal-app">
+  <div id="app">
+    <!-- 顶部导航栏 -->
+    <header class="header" v-if="currentPage === 'home'">
+      <div class="header-content">
+        <h1 class="logo">📚 德儒教育期刊系统</h1>
+        <div class="user-info">
+          <template v-if="currentUser">
+            <span class="welcome">欢迎，{{ currentUser.username }}</span>
+            <button class="logout-btn" @click="handleLogout">退出登录</button>
+          </template>
+          <template v-else>
+            <button class="login-btn" @click="currentPage = 'login'">登录</button>
+            <button class="register-btn" @click="currentPage = 'register'">注册</button>
+          </template>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主页面 -->
+    <main class="main-content" v-if="currentPage === 'home'">
+      <div class="search-bar">
+        <input 
+          v-model="keyword" 
+          @keyup.enter="search" 
+          placeholder="搜索期刊..." 
+          class="search-input" 
+        />
+        <button @click="search" class="search-btn">搜索</button>
+      </div>
+
+      <div class="categories">
+        <button 
+          v-for="category in categories" 
+          :key="category"
+          @click="selectCategory(category)"
+          :class="{ active: selectedCategory === category }"
+          class="category-btn"
+        >
+          {{ category }}
+        </button>
+      </div>
+
+      <div class="journal-grid">
+        <div 
+          v-for="journal in journals" 
+          :key="journal.id"
+          @click="showDetails(journal)"
+          class="journal-card"
+        >
+          <img :src="journal.cover || '/default-cover.jpg'" alt="封面" class="journal-cover" />
+          <h3 class="journal-title">{{ journal.title }}</h3>
+          <p class="journal-author">作者：{{ journal.author }}</p>
+        </div>
+      </div>
+
+      <div class="pagination" v-if="totalPages > 1">
+        <button @click="prevPage" :disabled="pageNum === 1" class="page-btn">上一页</button>
+        <span class="page-info">第 {{ pageNum }} / {{ totalPages }} 页</span>
+        <button @click="nextPage" :disabled="pageNum === totalPages" class="page-btn">下一页</button>
+      </div>
+    </main>
+
+    <!-- 期刊详情页面 -->
+    <main class="detail-page" v-if="currentPage === 'detail'">
+      <div class="detail-container">
+        <button class="back-btn" @click="backToGrid">← 返回列表</button>
+        <div class="detail-body">
+          <div class="detail-left">
+            <img :src="selectedJournal.cover || '/default-cover.jpg'" alt="封面" class="detail-cover" />
+          </div>
+          <div class="detail-right">
+            <h2 class="detail-title">{{ selectedJournal.title }}</h2>
+            <div class="detail-info">
+              <p><strong>作者：</strong>{{ selectedJournal.author }}</p>
+              <p><strong>出版社：</strong>{{ selectedJournal.publisher }}</p>
+              <p><strong>ISSN：</strong>{{ selectedJournal.issn }}</p>
+            </div>
+            <div class="detail-description">
+              <h3>简介</h3>
+              <p>{{ selectedJournal.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
     <!-- 登录页面 -->
     <LoginPage 
       v-if="currentPage === 'login'" 
       @login-success="handleLoginSuccess" 
-      @go-to-register="currentPage = 'register'"
-      @go-to-home="backToHome"
+      @show-register="currentPage = 'register'"
+      @back-home="backToHome"
     />
-    
+
     <!-- 注册页面 -->
     <RegisterPage 
-      v-else-if="currentPage === 'register'" 
-      @register-success="handleRegisterSuccess" 
-      @go-to-login="currentPage = 'login'"
-      @go-to-home="backToHome"
+      v-if="currentPage === 'register'" 
+      @show-login="currentPage = 'login'"
+      @back-home="backToHome"
     />
-    
-    <!-- 主页面 -->
-    <div v-else>
-      <!-- 顶部导航栏 -->
-      <header class="app-header">
-        <div class="header-top">
-          <h1>📚 德儒教育</h1>
-          <div class="user-info">
-            <template v-if="currentUser">
-              <span class="username">{{ currentUser.username }}</span>
-              <button class="logout-btn" @click="handleLogout">退出</button>
-            </template>
-            <template v-else>
-              <button class="login-nav-btn" @click="currentPage = 'login'">登录/注册</button>
-            </template>
-          </div>
-        </div>
-        
-        <!-- 搜索框 -->
-        <div class="search-container">
-          <input 
-            v-model="keyword" 
-            placeholder="搜索期刊..." 
-            class="search-input"
-          />
-          <button class="search-btn" @click="search">🔍</button>
-        </div>
-        
-        <!-- 期刊分类 -->
-        <div class="category-container">
-          <button 
-            v-for="category in categories" 
-            :key="category"
-            class="category-btn"
-            :class="{ active: selectedCategory === category }"
-            @click="selectCategory(category)"
-          >
-            {{ category }}
-          </button>
-        </div>
-      </header>
-      
-      <!-- 期刊卡片展示 -->
-      <main v-if="!selectedJournal">
-        <div class="journal-grid">
-          <div 
-            v-for="journal in journals" 
-            :key="journal.id" 
-            class="journal-card"
-            @click="showDetails(journal)"
-          >
-            <div class="journal-cover">
-              <img :src="journal.cover" :alt="journal.title" />
-            </div>
-            <div class="journal-info">
-              <h3 class="journal-title">{{ journal.title }}</h3>
-              <p class="journal-author">作者：{{ journal.author }}</p>
-              <p class="journal-category">{{ journal.category }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 分页控件 -->
-        <div class="pagination" v-if="totalPages > 1 || pageNum > 1">
-          <button class="page-btn" @click="prevPage" :disabled="pageNum === 1">上一页</button>
-          <span class="page-info">第 {{ pageNum }} 页，共 {{ totalPages }} 页</span>
-          <button class="page-btn" @click="nextPage" :disabled="pageNum === totalPages">下一页</button>
-        </div>
-        
-        <!-- 无结果提示 -->
-        <div class="no-results" v-if="journals.length === 0 && total === 0">
-          <p>未找到相关期刊</p>
-        </div>
-      </main>
-      
-      <!-- 期刊详情页 -->
-      <div class="journal-details" v-else>
-        <button class="back-btn" @click="backToGrid">← 返回列表</button>
-        <div class="detail-content">
-          <div class="detail-cover">
-            <img :src="selectedJournal.cover" :alt="selectedJournal.title" />
-          </div>
-          <div class="detail-info">
-            <h2>{{ selectedJournal.title }}</h2>
-            <p class="detail-author">作者：{{ selectedJournal.author }}</p>
-            <p class="detail-category">分类：{{ selectedJournal.category }}</p>
-            <p class="detail-description">{{ selectedJournal.description }}</p>
-            <p class="detail-publisher">出版社：{{ selectedJournal.publisher }}</p>
-            <p class="detail-issn">ISSN：{{ selectedJournal.issn }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -115,7 +106,7 @@
 import { ref, onMounted } from 'vue'
 import LoginPage from './views/LoginPage.vue'
 import RegisterPage from './views/RegisterPage.vue'
-import { getCategories, getJournals, getCurrentUser } from './api/index.js'
+import { getCategories, getJournals, getCurrentUser, refreshToken as apiRefreshToken } from './api/index.js'
 
 // 页面状态
 const currentPage = ref('home')
@@ -140,10 +131,51 @@ const journals = ref([])
 // 计算总页数
 const totalPages = ref(0)
 
+// Token 刷新定时器
+let refreshTimer = null
+
+// 刷新 Token
+const refreshTokens = async () => {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken')
+    if (!refreshToken) {
+      return
+    }
+    
+    const response = await apiRefreshToken(refreshToken)
+    localStorage.setItem('accessToken', response.data.data.accessToken)
+    localStorage.setItem('refreshToken', response.data.data.refreshToken)
+    
+    // 设置下一次刷新定时器（在 Access Token 过期前 2 分钟刷新）
+    scheduleTokenRefresh()
+  } catch (error) {
+    console.error('刷新 Token 失败:', error)
+    // 刷新失败，清除 token 并跳转到登录页
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    currentUser.value = null
+    currentPage.value = 'login'
+  }
+}
+
+// 安排 Token 刷新（Access Token 过期前 2 分钟）
+const scheduleTokenRefresh = () => {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer)
+  }
+  
+  // Access Token 有效期 15 分钟，在 13 分钟后刷新
+  refreshTimer = setTimeout(() => {
+    refreshTokens()
+  }, 13 * 60 * 1000)
+}
+
 // 登录成功处理
 const handleLoginSuccess = async (user) => {
   currentUser.value = user
   currentPage.value = 'home'
+  // 安排 Token 刷新
+  scheduleTokenRefresh()
   await fetchCategories()
   await fetchJournals()
 }
@@ -160,7 +192,11 @@ const backToHome = () => {
 
 // 退出登录
 const handleLogout = () => {
-  localStorage.removeItem('token')
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  if (refreshTimer) {
+    clearTimeout(refreshTimer)
+  }
   currentUser.value = null
   currentPage.value = 'home'
 }
@@ -209,11 +245,13 @@ const selectCategory = async (category) => {
 // 显示期刊详情
 const showDetails = (journal) => {
   selectedJournal.value = journal
+  currentPage.value = 'detail'
 }
 
 // 返回列表
 const backToGrid = () => {
   selectedJournal.value = null
+  currentPage.value = 'home'
 }
 
 // 上一页
@@ -237,365 +275,333 @@ onMounted(async () => {
   await fetchCategories()
   await fetchJournals()
   
-  const token = localStorage.getItem('token')
+  const accessToken = localStorage.getItem('accessToken')
   
-  if (token) {
+  if (accessToken) {
     try {
       const response = await getCurrentUser()
       currentUser.value = response.data.data
+      // 安排 Token 刷新
+      scheduleTokenRefresh()
     } catch (error) {
       console.error('获取用户信息失败:', error)
-      localStorage.removeItem('token')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
     }
   }
 })
 </script>
 
 <style scoped>
-.journal-app {
-  font-family: 'Arial', sans-serif;
-  width: 100%;
-  margin: 0;
-  padding: 20px;
-  background-color: #f5f5f5;
+#app {
+  font-family: Arial, sans-serif;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.app-header {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header-top {
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
-.header-top h1 {
-  font-size: 36px;
-  color: #333;
+.logo {
   margin: 0;
-  font-weight: bold;
+  font-size: 1.5rem;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 1rem;
 }
 
-.username {
-  font-size: 16px;
-  color: #666;
+.welcome {
+  margin-right: 1rem;
 }
 
-.logout-btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  border: 2px solid #e74c3c;
+.login-btn, .register-btn, .logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
   border-radius: 5px;
-  background-color: #fff;
-  color: #e74c3c;
   cursor: pointer;
   transition: all 0.3s;
 }
 
-.logout-btn:hover {
-  background-color: #e74c3c;
-  color: #fff;
+.login-btn:hover, .register-btn:hover, .logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.login-nav-btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  border: 2px solid #667eea;
-  border-radius: 5px;
-  background-color: #fff;
-  color: #667eea;
-  cursor: pointer;
-  transition: all 0.3s;
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.login-nav-btn:hover {
-  background-color: #667eea;
-  color: #fff;
-}
-
-.search-container {
+.search-bar {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 30px;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .search-input {
-  width: 50%;
-  padding: 10px;
-  font-size: 16px;
-  border: 2px solid #ddd;
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
   border-radius: 5px;
-  outline: none;
-  transition: all 0.3s;
-}
-
-.search-input:focus {
-  border-color: #aa3bff;
-  box-shadow: 0 0 0 3px rgba(170, 59, 255, 0.1);
+  font-size: 1rem;
 }
 
 .search-btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: 2px solid #ddd;
+  padding: 0.75rem 2rem;
+  background: #667eea;
+  color: white;
+  border: none;
   border-radius: 5px;
-  background-color: #fff;
   cursor: pointer;
-  transition: all 0.3s;
+  font-size: 1rem;
 }
 
 .search-btn:hover {
-  border-color: #aa3bff;
-  color: #aa3bff;
+  background: #5568d3;
 }
 
-.category-container {
+.categories {
   display: flex;
-  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
-  gap: 10px;
 }
 
 .category-btn {
-  padding: 10px 20px;
-  font-size: 14px;
-  border: 2px solid #ddd;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
   border-radius: 20px;
-  background-color: #fff;
   cursor: pointer;
   transition: all 0.3s;
-  font-weight: bold;
 }
 
 .category-btn:hover {
-  border-color: #aa3bff;
-  color: #aa3bff;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: #f5f5f5;
 }
 
 .category-btn.active {
-  background-color: #aa3bff;
-  color: #fff;
-  border-color: #aa3bff;
-  box-shadow: 0 2px 5px rgba(170, 59, 255, 0.3);
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
 }
 
 .journal-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
 .journal-card {
-  border: 2px solid #ddd;
+  background: white;
   border-radius: 10px;
-  overflow: hidden;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.3s;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .journal-card:hover {
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .journal-cover {
   width: 100%;
-  height: 300px;
-  overflow: hidden;
-  background-color: #f5f5f5;
-}
-
-.journal-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.journal-info {
-  padding: 15px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-bottom: 1rem;
 }
 
 .journal-title {
-  font-size: 18px;
-  font-weight: bold;
+  margin: 0 0 0.5rem 0;
   color: #333;
-  margin-bottom: 5px;
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 .journal-author {
-  font-size: 14px;
   color: #666;
-  margin-bottom: 5px;
+  font-size: 0.85rem;
+  margin: 0.3rem 0;
 }
 
 .journal-category {
-  font-size: 14px;
-  color: #aa3bff;
-  font-weight: bold;
+  color: #667eea;
+  font-size: 0.85rem;
+  margin: 0.3rem 0;
+}
+
+.journal-description {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .page-btn {
-  padding: 10px 20px;
-  font-size: 14px;
-  border: 2px solid #ddd;
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
   border-radius: 5px;
-  background-color: #fff;
   cursor: pointer;
-  transition: all 0.3s;
-}
-
-.page-btn:hover:not(:disabled) {
-  border-color: #aa3bff;
-  color: #aa3bff;
 }
 
 .page-btn:disabled {
-  opacity: 0.5;
+  background: #ccc;
   cursor: not-allowed;
 }
 
 .page-info {
-  font-size: 14px;
   color: #666;
 }
 
-.no-results {
-  text-align: center;
-  font-size: 18px;
-  color: #666;
-  padding: 50px 0;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.journal-details {
-  max-width: 800px;
+/* 详情页面样式 */
+.detail-page {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
   margin: 0 auto;
-  background-color: #fff;
-  padding: 20px;
+  width: 100%;
+  background: #f5f5f5;
+  min-height: calc(100vh - 80px);
+}
+
+.detail-container {
+  background: white;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn {
-  padding: 10px 20px;
-  font-size: 14px;
-  border: 2px solid #ddd;
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 5px;
-  background-color: #fff;
   cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 2rem;
   transition: all 0.3s;
-  margin-bottom: 20px;
 }
 
 .back-btn:hover {
-  border-color: #aa3bff;
-  color: #aa3bff;
+  background: #5568d3;
 }
 
-.detail-content {
+.detail-body {
   display: flex;
-  gap: 30px;
+  gap: 3rem;
+}
+
+.detail-left {
+  flex: 0 0 350px;
 }
 
 .detail-cover {
-  width: 300px;
-  height: 400px;
-  overflow: hidden;
-  border-radius: 10px;
-  background-color: #f5f5f5;
-}
-
-.detail-cover img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 20px;
-  box-sizing: border-box;
+  height: auto;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.detail-info h2 {
-  font-size: 28px;
+.detail-right {
+  flex: 1;
+}
+
+.detail-title {
+  margin: 0 0 1.5rem 0;
   color: #333;
-  margin-bottom: 20px;
-  font-weight: bold;
+  font-size: 2rem;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 1rem;
 }
 
-.detail-author {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 10px;
+.detail-info {
+  margin-bottom: 2rem;
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
 }
 
-.detail-category {
-  font-size: 16px;
-  color: #aa3bff;
-  font-weight: bold;
-  margin-bottom: 20px;
+.detail-info p {
+  margin: 0.75rem 0;
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.detail-info strong {
+  color: #333;
+  margin-right: 0.5rem;
 }
 
 .detail-description {
-  font-size: 16px;
+  margin-top: 2rem;
+}
+
+.detail-description h3 {
   color: #333;
-  line-height: 1.6;
-  margin-bottom: 20px;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #667eea;
+  padding-left: 1rem;
 }
 
-.detail-publisher {
-  font-size: 16px;
+.detail-description p {
   color: #666;
-  margin-bottom: 10px;
+  font-size: 1rem;
+  line-height: 1.8;
+  text-align: justify;
 }
 
-.detail-issn {
-  font-size: 16px;
-  color: #666;
-}
-
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .detail-content {
+  .detail-body {
     flex-direction: column;
   }
-
-  .detail-cover {
+  
+  .detail-left {
+    flex: none;
     width: 100%;
-    height: auto;
   }
-
-  .detail-cover img {
-    width: 100%;
-    height: auto;
+  
+  .detail-cover {
+    max-width: 100%;
   }
 }
 </style>
