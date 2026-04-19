@@ -8,6 +8,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // 允许携带 Cookie
 })
 
 // 请求拦截器 - 自动添加 Access Token
@@ -51,9 +52,14 @@ export const getCurrentUser = () => {
   return apiClient.get('/api/auth/me')
 }
 
-// 刷新 Token
-export const refreshToken = (refreshToken) => {
-  return apiClient.post('/api/auth/refresh', { refreshToken })
+// 刷新 Token（从 Cookie 中获取 Refresh Token）
+export const refreshToken = () => {
+  return apiClient.post('/api/auth/refresh')
+}
+
+// 退出登录
+export const logout = () => {
+  return apiClient.post('/api/auth/logout')
 }
 
 // 获取期刊列表

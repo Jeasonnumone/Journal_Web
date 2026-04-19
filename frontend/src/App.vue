@@ -106,7 +106,7 @@
 import { ref, onMounted } from 'vue'
 import LoginPage from './views/LoginPage.vue'
 import RegisterPage from './views/RegisterPage.vue'
-import { getCategories, getJournals, getCurrentUser, refreshToken as apiRefreshToken } from './api/index.js'
+import { getCategories, getJournals, getCurrentUser, refreshToken as apiRefreshToken, logout as apiLogout } from './api/index.js'
 
 // 页面状态
 const currentPage = ref('home')
@@ -137,14 +137,8 @@ let refreshTimer = null
 // 刷新 Token
 const refreshTokens = async () => {
   try {
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (!refreshToken) {
-      return
-    }
-    
-    const response = await apiRefreshToken(refreshToken)
+    const response = await apiRefreshToken()
     localStorage.setItem('accessToken', response.data.data.accessToken)
-    localStorage.setItem('refreshToken', response.data.data.refreshToken)
     
     // 设置下一次刷新定时器（在 Access Token 过期前 2 分钟刷新）
     scheduleTokenRefresh()
@@ -152,7 +146,6 @@ const refreshTokens = async () => {
     console.error('刷新 Token 失败:', error)
     // 刷新失败，清除 token 并跳转到登录页
     localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
     currentUser.value = null
     currentPage.value = 'login'
   }
@@ -191,14 +184,21 @@ const backToHome = () => {
 }
 
 // 退出登录
-const handleLogout = () => {
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('refreshToken')
-  if (refreshTimer) {
-    clearTimeout(refreshTimer)
+const handleLogout = async () => {
+  try {
+    // 调用后端 logout 接口，清除 Cookie 和 Redis 中的 Refresh Token
+    await apiLogout()
+  } catch (error) {
+    console.error('退出登录失败:', error)
+  } finally {
+    // 清除本地存储
+    localStorage.removeItem('accessToken')
+    if (refreshTimer) {
+      clearTimeout(refreshTimer)
+    }
+    currentUser.value = null
+    currentPage.value = 'home'
   }
-  currentUser.value = null
-  currentPage.value = 'home'
 }
 
 // 获取期刊分类

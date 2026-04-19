@@ -135,4 +135,9 @@ public class JwtUtil {
             return false;
         }
     }
+    
+    // 获取 Refresh Token 过期时间
+    public long getRefreshExpiration() {
+        return refreshExpiration;
+    }
 }

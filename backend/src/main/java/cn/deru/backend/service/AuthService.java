@@ -8,9 +8,12 @@ import cn.deru.backend.dto.UserDTO;
 import cn.deru.backend.model.User;
 import cn.deru.backend.repository.UserRepository;
 import cn.deru.backend.util.JwtUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AuthService {
@@ -18,11 +21,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
     
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate redisTemplate) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = new BCryptPasswordEncoder();
+        this.redisTemplate = redisTemplate;
     }
     
     // 注册
@@ -59,6 +64,10 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername(), user.getRole());
         String refreshToken = jwtUtil.generateRefreshToken(user.getId());
         
+        // 将 Refresh Token 存储到 Redis
+        String redisKey = "refresh_token:" + user.getId();
+        redisTemplate.opsForValue().set(redisKey, refreshToken, jwtUtil.getRefreshExpiration(), TimeUnit.SECONDS);
+        
         // 构造响应
         LoginResponse response = new LoginResponse();
         response.setAccessToken(accessToken);
@@ -84,6 +93,20 @@ public class AuthService {
         // 从 Refresh Token 中获取 userId
         Long userId = jwtUtil.getUserIdFromToken(refreshToken);
         
+        // 从 Redis 中获取存储的 Refresh Token
+        String redisKey = "refresh_token:" + userId;
+        String storedRefreshToken = redisTemplate.opsForValue().get(redisKey);
+        
+        // 检查 Redis 中是否存在该 Refresh Token
+        if (storedRefreshToken == null) {
+            throw new RuntimeException("Refresh token not found in Redis");
+        }
+        
+        // 验证传入的 Refresh Token 是否与 Redis 中存储的一致
+        if (!storedRefreshToken.equals(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+        
         // 检查用户是否存在
 //        User user = userRepository.findById(userId);
         User user = userRepository.selectById(userId);
@@ -94,6 +117,9 @@ public class AuthService {
         // 生成新的 Access Token 和 Refresh Token
         String newAccessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername(), user.getRole());
         String newRefreshToken = jwtUtil.generateRefreshToken(user.getId());
+        
+        // 更新 Redis 中的 Refresh Token
+        redisTemplate.opsForValue().set(redisKey, newRefreshToken, jwtUtil.getRefreshExpiration(), TimeUnit.SECONDS);
         
         RefreshTokenResponse response = new RefreshTokenResponse();
         response.setAccessToken(newAccessToken);
@@ -106,5 +132,20 @@ public class AuthService {
     public UserDTO getCurrentUser(String username) {
         User user = userRepository.findByUsername(username);
         return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+    }
+    
+    // 退出登录 - 删除 Redis 中的 Refresh Token
+    public void logout(String refreshToken) {
+        try {
+            // 从 Refresh Token 中获取 userId
+            Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+            
+            // 从 Redis 中删除 Refresh Token
+            String redisKey = "refresh_token:" + userId;
+            redisTemplate.delete(redisKey);
+        } catch (Exception e) {
+            // 如果解析失败，忽略错误
+            e.printStackTrace();
+        }
     }
 }

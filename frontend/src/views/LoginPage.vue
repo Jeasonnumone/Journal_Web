@@ -55,8 +55,8 @@ const handleLogin = async () => {
   
   try {
     const response = await login(loginForm.value)
+    // 只保存 Access Token，Refresh Token 在 HttpOnly Cookie 中
     localStorage.setItem('accessToken', response.data.data.accessToken)
-    localStorage.setItem('refreshToken', response.data.data.refreshToken)
     emit('login-success', response.data.data.user)
   } catch (error) {
     errorMessage.value = error.response?.data?.message || '登录失败，请稍后重试'
