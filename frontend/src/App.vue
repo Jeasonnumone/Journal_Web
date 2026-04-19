@@ -138,10 +138,12 @@ let refreshTimer = null
 const refreshTokens = async () => {
   try {
     const response = await apiRefreshToken()
-    localStorage.setItem('accessToken', response.data.data.accessToken)
+    const { accessToken, accessTokenExpiresIn } = response.data.data
     
-    // 设置下一次刷新定时器（在 Access Token 过期前 2 分钟刷新）
-    scheduleTokenRefresh()
+    localStorage.setItem('accessToken', accessToken)
+    
+    // 根据 Access Token 的过期时间动态设置刷新定时器（过期前 2 分钟刷新）
+    scheduleTokenRefresh(accessTokenExpiresIn)
   } catch (error) {
     console.error('刷新 Token 失败:', error)
     // 刷新失败，清除 token 并跳转到登录页
@@ -151,24 +153,38 @@ const refreshTokens = async () => {
   }
 }
 
-// 安排 Token 刷新（Access Token 过期前 2 分钟）
-const scheduleTokenRefresh = () => {
+// 安排 Token 刷新（在 Access Token 过期前 2 分钟刷新）
+const scheduleTokenRefresh = (expiresIn) => {
   if (refreshTimer) {
     clearTimeout(refreshTimer)
   }
   
-  // Access Token 有效期 15 分钟，在 13 分钟后刷新
-  refreshTimer = setTimeout(() => {
+  // 在过期前 2 分钟（120 秒）刷新
+  const refreshTime = (expiresIn - 120) * 1000
+  
+  // 确保刷新时间至少为 1 秒，防止过期时间已过
+  if (refreshTime > 1000) {
+    refreshTimer = setTimeout(() => {
+      refreshTokens()
+    }, refreshTime)
+    console.log(`Token 将在 ${expiresIn - 120} 秒后刷新`);
+  } else {
+    // 如果剩余时间不足，立即刷新
+    console.log('Token 剩余时间不足，立即刷新');
     refreshTokens()
-  }, 13 * 60 * 1000)
+  }
 }
 
 // 登录成功处理
-const handleLoginSuccess = async (user) => {
+const handleLoginSuccess = async (user, accessTokenExpiresIn) => {
   currentUser.value = user
   currentPage.value = 'home'
-  // 安排 Token 刷新
-  scheduleTokenRefresh()
+  
+  // 根据 Access Token 的过期时间安排刷新定时器
+  if (accessTokenExpiresIn) {
+    scheduleTokenRefresh(accessTokenExpiresIn)
+  }
+  
   await fetchCategories()
   await fetchJournals()
 }

@@ -72,6 +72,7 @@ public class AuthService {
         LoginResponse response = new LoginResponse();
         response.setAccessToken(accessToken);
         response.setRefreshToken(refreshToken);
+        response.setAccessTokenExpiresIn(jwtUtil.getAccessExpiration()); // 设置 Access Token 过期时间
         
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
         userInfo.setId(user.getId());
@@ -124,6 +125,7 @@ public class AuthService {
         RefreshTokenResponse response = new RefreshTokenResponse();
         response.setAccessToken(newAccessToken);
         response.setRefreshToken(newRefreshToken);
+        response.setAccessTokenExpiresIn(jwtUtil.getAccessExpiration());
         
         return response;
     }

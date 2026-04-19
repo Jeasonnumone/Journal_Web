@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Data
 public class JwtUtil {
     
     @Value("${jwt.secret}")
@@ -136,8 +138,13 @@ public class JwtUtil {
         }
     }
     
-    // 获取 Refresh Token 过期时间
-    public long getRefreshExpiration() {
-        return refreshExpiration;
-    }
+//    // 获取 Refresh Token 过期时间
+//    public long getRefreshExpiration() {
+//        return refreshExpiration;
+//    }
+//
+//    // 获取 Access Token 过期时间
+//    public long getAccessExpiration() {
+//        return refreshExpiration;
+//    }
 }

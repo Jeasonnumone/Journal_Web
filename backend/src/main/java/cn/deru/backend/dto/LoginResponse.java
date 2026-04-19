@@ -6,6 +6,7 @@ import lombok.Data;
 public class LoginResponse {
     private String accessToken;
     private String refreshToken;
+    private Long accessTokenExpiresIn; // Access Token 过期时间（秒）
     private UserInfo user;
     
     @Data
