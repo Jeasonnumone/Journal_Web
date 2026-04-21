@@ -72,4 +72,33 @@ export const getCategories = () => {
   return apiClient.get('/api/journals/categories')
 }
 
+// 获取期刊详情
+export const getJournalById = (id) => {
+  return apiClient.get(`/api/journals/${id}`)
+}
+
+// 获取评论列表（根评论）
+export const getRootComments = (journalId, page = 1, pageSize = 10) => {
+  return apiClient.get(`/api/comments/journal/${journalId}`, {
+    params: { page, pageSize }
+  })
+}
+
+// 获取回复列表
+export const getReplies = (rootId, page = 1, pageSize = 20) => {
+  return apiClient.get(`/api/comments/${rootId}/replies`, {
+    params: { page, pageSize }
+  })
+}
+
+// 发表评论/回复
+export const createComment = (data) => {
+  return apiClient.post('/api/comments', data)
+}
+
+// 删除评论
+export const deleteComment = (commentId) => {
+  return apiClient.delete(`/api/comments/${commentId}`)
+}
+
 export default apiClient

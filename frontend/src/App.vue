@@ -82,6 +82,13 @@
             </div>
           </div>
         </div>
+        
+        <!-- 评论区域 -->
+        <CommentSection 
+          v-if="selectedJournal && selectedJournal.id" 
+          :journal-id="selectedJournal.id" 
+          :current-user="currentUser"
+        />
       </div>
     </main>
 
@@ -106,6 +113,7 @@
 import { ref, onMounted } from 'vue'
 import LoginPage from './views/LoginPage.vue'
 import RegisterPage from './views/RegisterPage.vue'
+import CommentSection from './components/CommentSection.vue'
 import { getCategories, getJournals, getCurrentUser, refreshToken as apiRefreshToken, logout as apiLogout } from './api/index.js'
 
 // 页面状态
