@@ -1,108 +1,148 @@
 <template>
   <div class="comment-section">
-    <h3 class="section-title">评论区域</h3>
+    <div class="section-header">
+      <el-icon><ChatDotRound /></el-icon>
+      <span class="section-title">评论区域</span>
+    </div>
     
     <!-- 发表评论表单 -->
     <div class="comment-form">
-      <textarea 
-        v-model="newComment" 
-        placeholder="写下你的评论..." 
+      <el-input
+        v-model="newComment"
+        type="textarea"
+        :rows="3"
+        placeholder="写下你的评论..."
         class="comment-input"
-        rows="3"
-      ></textarea>
+      ></el-input>
       <div class="form-actions">
-        <button 
+        <el-button 
+          type="primary" 
           @click="submitComment" 
           :disabled="!newComment.trim() || !currentUser"
-          class="submit-btn"
         >
           {{ currentUser ? '发表评论' : '请先登录' }}
-        </button>
-        <button v-if="isReplying" @click="cancelReply" class="cancel-btn">取消回复</button>
+        </el-button>
+        <el-button v-if="isReplying" @click="cancelReply">取消回复</el-button>
       </div>
     </div>
 
     <!-- 评论列表 -->
     <div class="comment-list">
-      <div v-if="comments.length === 0" class="no-comments">
-        暂无评论，快来发表第一条评论吧！
-      </div>
+      <el-empty v-if="comments.length === 0" description="暂无评论，快来发表第一条评论吧！" />
+      
       <div v-else>
         <div v-for="comment in comments" :key="comment.id" class="comment-item">
-          <div class="comment-header">
-            <span class="username">{{ comment.username || '匿名用户' }}</span>
-            <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
-          </div>
-          <div class="comment-content">{{ comment.content }}</div>
-          <div class="comment-footer">
-            <button 
-              v-if="currentUser" 
-              @click="startReply(comment)" 
-              class="reply-btn"
-            >
-              回复
-            </button>
-            <button 
-              v-if="currentUser && currentUser.id === comment.userId" 
-              @click="deleteCommentHandler(comment.id)" 
-              class="delete-btn"
-            >
-              删除
-            </button>
-            <span 
-              v-if="comment.replyCount > 0" 
-              @click="toggleReplies(comment)" 
-              class="reply-count"
-            >
-              {{ comment.replyCount }} 条回复
-              <span class="arrow">{{ expandedComments[comment.id] ? '▲' : '▼' }}</span>
-            </span>
-          </div>
-
-          <!-- 回复列表 -->
-          <div v-if="expandedComments[comment.id]" class="replies-container">
-            <div v-if="loadingReplies[comment.id]" class="loading">加载中...</div>
-            <div v-else-if="repliesMap[comment.id] && repliesMap[comment.id].length > 0">
-              <div v-for="reply in repliesMap[comment.id]" :key="reply.id" class="reply-item">
-                <div class="reply-header">
-                  <span class="username">{{ reply.username || '匿名用户' }}</span>
-                  <span class="reply-time">{{ formatTime(reply.createTime) }}</span>
-                  <span v-if="reply.replyToUsername" class="reply-to">
-                    回复 @{{ reply.replyToUsername }}
-                  </span>
-                </div>
-                <div class="reply-content">{{ reply.content }}</div>
-                <div class="reply-footer">
-                  <button v-if="currentUser" @click="startReply(comment, reply)" class="reply-btn">
-                    回复
-                  </button>
-                  <button 
-                    v-if="currentUser && currentUser.id === reply.userId" 
-                    @click="deleteCommentHandler(reply.id)" 
-                    class="delete-btn"
-                  >
-                    删除
-                  </button>
-                </div>
+          <el-card shadow="hover" class="comment-card">
+            <div class="comment-header">
+              <el-avatar :size="36" :icon="UserFilled" class="avatar" />
+              <div class="user-info">
+                <span class="username">{{ comment.username || '匿名用户' }}</span>
+                <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
               </div>
             </div>
-            <div v-else class="no-replies">暂无回复</div>
-          </div>
+            
+            <div class="comment-content">{{ comment.content }}</div>
+            
+            <div class="comment-footer">
+              <el-button 
+                v-if="currentUser" 
+                type="info" 
+                size="small" 
+                text 
+                @click="startReply(comment)"
+              >
+                回复
+              </el-button>
+              <el-button 
+                v-if="currentUser && currentUser.id === comment.userId" 
+                type="danger" 
+                size="small" 
+                text 
+                @click="deleteCommentHandler(comment.id)"
+              >
+                删除
+              </el-button>
+              <el-tag 
+                v-if="comment.replyCount > 0" 
+                size="small" 
+                type="info" 
+                effect="plain"
+                class="reply-count-tag"
+                @click="toggleReplies(comment)"
+              >
+                {{ comment.replyCount }} 条回复
+                <el-icon class="arrow-icon">
+                  <component :is="expandedComments[comment.id] ? 'ArrowUp' : 'ArrowDown'" />
+                </el-icon>
+              </el-tag>
+            </div>
+
+            <!-- 回复列表 -->
+            <el-collapse-transition>
+              <div v-if="expandedComments[comment.id]" class="replies-container">
+                <div v-if="loadingReplies[comment.id]" class="loading">
+                  <el-skeleton :rows="2" animated />
+                </div>
+                <div v-else-if="repliesMap[comment.id] && repliesMap[comment.id].length > 0">
+                  <div v-for="reply in repliesMap[comment.id]" :key="reply.id" class="reply-item">
+                    <div class="reply-header">
+                      <el-avatar :size="28" :icon="UserFilled" class="reply-avatar" />
+                      <div class="reply-user-info">
+                        <span class="username">{{ reply.username || '匿名用户' }}</span>
+                        <span class="reply-time">{{ formatTime(reply.createTime) }}</span>
+                        <span v-if="reply.replyToUsername" class="reply-to">
+                          回复 @{{ reply.replyToUsername }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="reply-content">{{ reply.content }}</div>
+                    <div class="reply-footer">
+                      <el-button 
+                        v-if="currentUser" 
+                        type="primary" 
+                        size="small" 
+                        text 
+                        @click="startReply(comment, reply)"
+                      >
+                        回复
+                      </el-button>
+                      <el-button 
+                        v-if="currentUser && currentUser.id === reply.userId" 
+                        type="danger" 
+                        size="small" 
+                        text 
+                        @click="deleteCommentHandler(reply.id)"
+                      >
+                        删除
+                      </el-button>
+                    </div>
+                  </div>
+                </div>
+                <el-empty v-else description="暂无回复" :image-size="60" />
+              </div>
+            </el-collapse-transition>
+          </el-card>
         </div>
       </div>
     </div>
 
     <!-- 分页 -->
     <div v-if="totalPages > 1" class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1" class="page-btn">上一页</button>
-      <span class="page-info">第 {{ currentPage }} / {{ totalPages }} 页</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages" class="page-btn">下一页</button>
+      <el-pagination
+        v-model:current-page="currentPage"
+        layout="prev, pager, next"
+        :total="total"
+        :page-size="10"
+        @current-change="handlePageChange"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { UserFilled, ChatDotRound, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 import { getRootComments, getReplies, createComment, deleteComment as apiDeleteComment } from '../api/index.js'
 
 const props = defineProps({
@@ -140,6 +180,7 @@ const loadComments = async () => {
     totalPages.value = Math.ceil(total.value / (pageData.size || 10))
   } catch (error) {
     console.error('加载评论失败:', error)
+    ElMessage.error('加载评论失败')
   }
 }
 
@@ -171,9 +212,12 @@ const toggleReplies = async (comment) => {
 }
 
 const submitComment = async () => {
-  if (!newComment.value.trim()) return
+  if (!newComment.value.trim()) {
+    ElMessage.warning('请输入评论内容')
+    return
+  }
   if (!props.currentUser) {
-    alert('请先登录')
+    ElMessage.warning('请先登录')
     return
   }
 
@@ -197,11 +241,12 @@ const submitComment = async () => {
     replyToComment.value = null
     replyToUser.value = null
     
+    ElMessage.success('评论成功')
     await loadComments()
     emit('comment-added')
   } catch (error) {
     console.error('发表评论失败:', error)
-    alert('评论失败：' + (error.response?.data?.message || error.message))
+    ElMessage.error('评论失败：' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -220,9 +265,13 @@ const cancelReply = () => {
 }
 
 const deleteCommentHandler = async (commentId) => {
-  if (!confirm('确定要删除这条评论吗？')) return
-
   try {
+    await ElMessageBox.confirm('确定要删除这条评论吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    
     await apiDeleteComment(commentId)
     await loadComments()
     
@@ -232,25 +281,19 @@ const deleteCommentHandler = async (commentId) => {
       }
     }
     
+    ElMessage.success('删除成功')
     emit('comment-deleted')
   } catch (error) {
-    console.error('删除评论失败:', error)
-    alert('删除失败：' + (error.response?.data?.message || error.message))
+    if (error !== 'cancel') {
+      console.error('删除评论失败:', error)
+      ElMessage.error('删除失败：' + (error.response?.data?.message || error.message))
+    }
   }
 }
 
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    loadComments()
-  }
-}
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    loadComments()
-  }
+const handlePageChange = (page) => {
+  currentPage.value = page
+  loadComments()
 }
 
 const formatTime = (timeString) => {
@@ -292,13 +335,25 @@ onMounted(() => {
   padding: 2rem;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-header .el-icon {
+  font-size: 1.5rem;
+  color: #667eea;
 }
 
 .section-title {
-  margin: 0 0 1.5rem 0;
-  color: #333;
   font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .comment-form {
@@ -306,168 +361,103 @@ onMounted(() => {
 }
 
 .comment-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-family: inherit;
-  resize: vertical;
-  box-sizing: border-box;
-}
-
-.comment-input:focus {
-  outline: none;
-  border-color: #667eea;
+  margin-bottom: 1rem;
 }
 
 .form-actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.submit-btn {
-  padding: 0.5rem 1.5rem;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: #5568d3;
-}
-
-.cancel-btn {
-  padding: 0.5rem 1.5rem;
-  background: #f0f0f0;
-  color: #666;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.cancel-btn:hover {
-  background: #e0e0e0;
 }
 
 .comment-list {
   margin-top: 1.5rem;
 }
 
-.no-comments {
-  text-align: center;
-  color: #999;
-  padding: 2rem;
-}
-
 .comment-item {
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 1rem;
 }
 
-.comment-item:last-child {
-  border-bottom: none;
+.comment-card {
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.comment-card:hover {
+  transform: translateY(-2px);
 }
 
 .comment-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .username {
   font-weight: bold;
   color: #667eea;
+  font-size: 0.95rem;
 }
 
 .comment-time {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #999;
 }
 
 .comment-content {
   color: #333;
   line-height: 1.6;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
 }
 
 .comment-footer {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
 }
 
-.reply-btn,
-.delete-btn {
-  padding: 0.25rem 0.75rem;
-  background: transparent;
-  border: 1px solid #667eea;
-  color: #667eea;
-  border-radius: 3px;
+.reply-count-tag {
   cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.reply-btn:hover,
-.delete-btn:hover {
-  background: #667eea;
-  color: white;
-}
-
-.delete-btn {
-  border-color: #dc3545;
-  color: #dc3545;
-}
-
-.delete-btn:hover {
-  background: #dc3545;
-  color: white;
-}
-
-.reply-count {
-  color: #667eea;
-  cursor: pointer;
-  font-size: 0.85rem;
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.reply-count:hover {
-  text-decoration: underline;
+.reply-count-tag:hover {
+  opacity: 0.8;
 }
 
-.arrow {
-  font-size: 0.75rem;
+.arrow-icon {
+  font-size: 0.8rem;
 }
 
 .replies-container {
   margin-top: 1rem;
   padding: 1rem;
   background: #f9f9f9;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
-.loading,
-.no-replies {
-  text-align: center;
-  color: #999;
+.loading {
   padding: 1rem;
 }
 
 .reply-item {
-  padding: 0.75rem 0;
+  padding: 1rem 0;
   border-bottom: 1px solid #eee;
 }
 
@@ -478,14 +468,33 @@ onMounted(() => {
 .reply-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.reply-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.reply-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.reply-user-info .username {
   font-size: 0.9rem;
+}
+
+.reply-time {
+  font-size: 0.75rem;
+  color: #999;
 }
 
 .reply-to {
   color: #999;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .reply-content {
@@ -497,34 +506,14 @@ onMounted(() => {
 
 .reply-footer {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid #eee;
-}
-
-.page-btn {
-  padding: 0.5rem 1rem;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.page-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.page-info {
-  color: #666;
 }
 </style>
