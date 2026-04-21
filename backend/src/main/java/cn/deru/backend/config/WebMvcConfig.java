@@ -19,7 +19,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 // 拦截所有需要认证的接口
                 .addPathPatterns("/api/**")
                 // 放行登录、注册接口以及期刊浏览接口
-                .excludePathPatterns("/api/auth/register", "/api/auth/login", "/api/journals/**", "/api/auth/refresh");
+                .excludePathPatterns(
+                    "/api/auth/register", 
+                    "/api/auth/login", 
+                    "/api/journals/**", 
+                    "/api/auth/refresh",
+//                    "/api/comments/**"
+                    "/api/comments/journal/**" // 查看评论不需要登录
+                );
     }
     
     @Override
