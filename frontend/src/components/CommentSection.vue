@@ -51,18 +51,14 @@
                 size="small" 
                 text 
                 @click="startReply(comment)"
-              >
-                回复
-              </el-button>
+              >回复</el-button>
               <el-button 
                 v-if="currentUser && currentUser.id === comment.userId" 
                 type="danger" 
                 size="small" 
                 text 
                 @click="deleteCommentHandler(comment.id)"
-              >
-                删除
-              </el-button>
+              >删除</el-button>
               <el-tag 
                 v-if="comment.replyCount > 0" 
                 size="medium" 
@@ -119,6 +115,7 @@
                       >删除</el-button>
                     </div>
                   </div>
+
                 </div>
                 <el-empty v-else description="暂无回复" :image-size="60" />
               </div>
@@ -238,6 +235,12 @@ const submitComment = async () => {
     }
 
     await createComment(commentData)
+    
+    // 保存根评论 ID，用于刷新回复
+    const rootId = replyToComment.value?.rootId || replyToComment.value?.id
+    const wasExpanded = isReplying.value && expandedComments[rootId]
+    
+    // 重置状态
     newComment.value = ''
     isReplying.value = false
     replyToComment.value = null
@@ -245,6 +248,13 @@ const submitComment = async () => {
     
     ElMessage.success('评论成功')
     await loadComments()
+    
+    // 如果是回复且列表展开中，重新加载回复
+    if (wasExpanded && rootId) {
+      const rootComment = comments.value.find(c => c.id === rootId)
+      if (rootComment) await loadReplies(rootComment)
+    }
+    
     emit('comment-added')
   } catch (error) {
     console.error('发表评论失败:', error)
