@@ -10,7 +10,7 @@
       <el-input
         v-model="newComment"
         type="textarea"
-        :rows="3"
+        :rows="4"
         placeholder="写下你的评论..."
         class="comment-input"
       ></el-input>
@@ -33,6 +33,7 @@
       <div v-else>
         <div v-for="comment in comments" :key="comment.id" class="comment-item">
           <el-card shadow="hover" class="comment-card">
+
             <div class="comment-header">
               <el-avatar :size="36" :icon="UserFilled" class="avatar" />
               <div class="user-info">
@@ -64,15 +65,17 @@
               </el-button>
               <el-tag 
                 v-if="comment.replyCount > 0" 
-                size="small" 
+                size="medium" 
                 type="info" 
-                effect="plain"
+                effect="light"
                 class="reply-count-tag"
                 @click="toggleReplies(comment)"
               >
                 {{ comment.replyCount }} 条回复
                 <el-icon class="arrow-icon">
-                  <component :is="expandedComments[comment.id] ? 'ArrowUp' : 'ArrowDown'" />
+                  <!-- <component :is="expandedComments[comment.id] ? 'ArrowUp' : 'ArrowDown'" /> -->
+                  <ArrowUp v-if="expandedComments[comment.id]" />
+                  <ArrowDown v-else />
                 </el-icon>
               </el-tag>
             </div>
@@ -85,6 +88,7 @@
                 </div>
                 <div v-else-if="repliesMap[comment.id] && repliesMap[comment.id].length > 0">
                   <div v-for="reply in repliesMap[comment.id]" :key="reply.id" class="reply-item">
+
                     <div class="reply-header">
                       <el-avatar :size="28" :icon="UserFilled" class="reply-avatar" />
                       <div class="reply-user-info">
@@ -95,7 +99,9 @@
                         </span>
                       </div>
                     </div>
+
                     <div class="reply-content">{{ reply.content }}</div>
+
                     <div class="reply-footer">
                       <el-button 
                         v-if="currentUser" 
@@ -103,18 +109,14 @@
                         size="small" 
                         text 
                         @click="startReply(comment, reply)"
-                      >
-                        回复
-                      </el-button>
+                      >回复</el-button>
                       <el-button 
                         v-if="currentUser && currentUser.id === reply.userId" 
                         type="danger" 
                         size="small" 
                         text 
                         @click="deleteCommentHandler(reply.id)"
-                      >
-                        删除
-                      </el-button>
+                      >删除</el-button>
                     </div>
                   </div>
                 </div>
