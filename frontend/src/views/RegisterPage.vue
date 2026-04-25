@@ -1,7 +1,7 @@
 <template>
   <div class="register-page">
     <div class="register-container">
-      <button class="back-home-btn" @click="goToHome">← 返回首页</button>
+      <button class="back-home-btn" @click="router.push('/')">← 返回首页</button>
       <h1 class="register-title">📚 德儒教育</h1>
       <h2 class="register-subtitle">注册</h2>
       
@@ -65,7 +65,7 @@
       
       <div class="register-footer">
         <span>已有账号？</span>
-        <a href="#" class="login-link" @click.prevent="goToLogin">去登录</a>
+        <a href="#" class="login-link" @click.prevent="router.push('/login')">去登录</a>
       </div>
     </div>
   </div>
@@ -73,7 +73,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { register } from '../api'
+
+const router = useRouter()
 
 const registerForm = ref({
   username: '',
@@ -85,8 +88,6 @@ const registerForm = ref({
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
-
-const emit = defineEmits(['register-success', 'show-login', 'back-home'])
 
 const handleRegister = async () => {
   errorMessage.value = ''
@@ -108,21 +109,13 @@ const handleRegister = async () => {
     
     successMessage.value = '注册成功，请登录'
     setTimeout(() => {
-      emit('show-login')
+      router.push('/login')
     }, 1500)
   } catch (error) {
     errorMessage.value = error.response?.data?.message || '注册失败，请稍后重试'
   } finally {
     loading.value = false
   }
-}
-
-const goToLogin = () => {
-  emit('show-login')
-}
-
-const goToHome = () => {
-  emit('back-home')
 }
 </script>
 

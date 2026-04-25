@@ -1,7 +1,7 @@
 <template>
   <div class="auth-container">
     <div class="auth-card">
-      <button class="back-home-btn" @click="$emit('back-home')">← 返回首页</button>
+      <button class="back-home-btn" @click="router.push('/')">← 返回首页</button>
       <h2>用户登录</h2>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
@@ -29,7 +29,7 @@
       </form>
       <div class="auth-footer">
         <span>还没有账号？</span>
-        <a href="#" @click.prevent="$emit('show-register')">立即注册</a>
+        <a href="#" @click.prevent="router.push('/register')">立即注册</a>
       </div>
     </div>
   </div>
@@ -37,9 +37,11 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { login } from '../api/index.js'
+import { handleLoginSuccess } from '../composables/useAuth.js'
 
-const emit = defineEmits(['login-success', 'show-register', 'back-home'])
+const router = useRouter()
 
 const loginForm = ref({
   username: '',
@@ -57,11 +59,10 @@ const handleLogin = async () => {
     const response = await login(loginForm.value)
     const { accessToken, accessTokenExpiresIn, user } = response.data.data
     
-    // 只保存 Access Token，Refresh Token 在 HttpOnly Cookie 中
     localStorage.setItem('accessToken', accessToken)
     
-    // 触发登录成功事件，传递用户信息和过期时间
-    emit('login-success', user, accessTokenExpiresIn)
+    handleLoginSuccess(user, accessTokenExpiresIn)
+    router.push('/')
   } catch (error) {
     errorMessage.value = error.response?.data?.message || '登录失败，请稍后重试'
   } finally {
