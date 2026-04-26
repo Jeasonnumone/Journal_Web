@@ -53,6 +53,7 @@ public class AuthController {
         LoginResponse safeResponse = new LoginResponse();
         safeResponse.setAccessToken(loginResponse.getAccessToken());
         safeResponse.setUser(loginResponse.getUser());
+        safeResponse.setAccessTokenExpiresIn(loginResponse.getAccessTokenExpiresIn());
         
         return Result.success(safeResponse);
     }
