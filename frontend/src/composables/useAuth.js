@@ -8,11 +8,13 @@ let refreshTimer = null
 export async function refreshTokens() {
   try {
     const { data } = await apiRefreshToken()
-    const { accessToken, accessTokenExpiresIn } = data
+    const { accessToken, accessTokenExpiresIn } = data.data
     
     localStorage.setItem('accessToken', accessToken)
+    // console.log("expiresIn=", accessTokenExpiresIn)
     scheduleTokenRefresh(accessTokenExpiresIn)
   } catch (error) {
+    console.error('刷新 Token 失败,退出登录:', error)
     logout()
   }
 }
@@ -20,14 +22,22 @@ export async function refreshTokens() {
 // 安排 Token 刷新
 function scheduleTokenRefresh(expiresIn) {
   if (refreshTimer) clearTimeout(refreshTimer)
-  
-  const refreshTime = (expiresIn - 120) * 1000
-  if (refreshTime > 1000) {
-    refreshTimer = setTimeout(refreshTokens, refreshTime)
-  } else {
-    refreshTokens()
+
+  if (!expiresIn || expiresIn <= 60) {
+      refreshTimer = setTimeout(refreshTokens, 15*60*1000)
+      console.log("定时任务开启(自定义设置),refreshTimer=", 15*60*1000)
+      return
   }
+
+  const refreshTime = (expiresIn - 60) * 1000
+
+  refreshTimer = setTimeout(
+      refreshTokens,
+      refreshTime
+  )
+  console.log("定时任务开启,refreshTimer=", refreshTime)
 }
+
 
 // 初始化用户信息
 export async function initUser() {
@@ -37,7 +47,8 @@ export async function initUser() {
   try {
     const { data } = await getCurrentUser()
     currentUser.value = data.data
-    scheduleTokenRefresh()
+    refreshTokens()
+    // scheduleTokenRefresh()
   } catch (error) {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')

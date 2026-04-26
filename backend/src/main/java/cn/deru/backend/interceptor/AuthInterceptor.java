@@ -33,7 +33,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":401,\"message\":\"No-Authorization, Need Token\"}");
-            log.info("请求无token，被拦截返回");
+            log.warn("请求无token，被拦截返回");
             return false;
         }
         
@@ -54,7 +54,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":401,\"message\":\"token expirationed\"}");
-                log.info("token时间过期");
+                log.warn("token时间过期");
                 return false;
             }
         } catch (Exception e) {
