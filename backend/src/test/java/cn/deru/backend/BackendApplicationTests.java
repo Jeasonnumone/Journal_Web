@@ -18,6 +18,7 @@ class BackendApplicationTests {
         Deque<Integer> deque = new ArrayDeque<>();
 
         List<Integer> list = new ArrayList<>();
+        list.sort((x,y)->y-x);
 
     }
 

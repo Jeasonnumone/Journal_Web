@@ -34,7 +34,7 @@ public class ControllerLogAspect {
             return result;
         } catch (Exception e) {
             long cost = System.currentTimeMillis() - start;
-            log.error("!!! {} 异常, 耗时: {}ms", method, cost, e);
+            log.error("!!! {} 异常, 耗时: {}ms", method, cost);
             throw e;
         }
     }

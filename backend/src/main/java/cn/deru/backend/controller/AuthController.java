@@ -5,6 +5,7 @@ import cn.deru.backend.dto.LoginResponse;
 import cn.deru.backend.dto.RefreshTokenResponse;
 import cn.deru.backend.dto.RegisterRequest;
 import cn.deru.backend.dto.UserDTO;
+import cn.deru.backend.dto.VerifyCodeRequest;
 import cn.deru.backend.model.Result;
 import cn.deru.backend.service.AuthService;
 import cn.deru.backend.util.UserContext;
@@ -109,5 +110,12 @@ public class AuthController {
         
         UserDTO user = authService.getCurrentUser(username);
         return Result.success(user);
+    }
+    
+    // 发送注册验证码
+    @PostMapping("/verify-code")
+    public Result<Void> sendVerifyCode(@RequestBody VerifyCodeRequest request) {
+        authService.sendVerifyCode(request.getEmail());
+        return Result.success(null);
     }
 }

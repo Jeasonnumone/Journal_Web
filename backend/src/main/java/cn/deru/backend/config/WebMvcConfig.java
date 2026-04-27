@@ -24,6 +24,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                     "/api/auth/login", 
                     "/api/journals/**", 
                     "/api/auth/refresh",
+                    "/api/auth/verify-code",
 //                    "/api/comments/**"
                     "/api/comments/journal/**" // 查看评论不需要登录
                 );

@@ -19,11 +19,34 @@
         
         <div class="form-group">
           <label class="form-label">邮箱</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input 
+              v-model="registerForm.email" 
+              type="email" 
+              class="form-input" 
+              placeholder="请输入邮箱"
+              required
+              style="flex: 1;"
+            />
+            <el-button 
+              type="primary" 
+              @click="handleSendVerifyCode"
+              :disabled="countdown > 0 || !registerForm.email"
+              style="width: 120px;"
+            >
+              {{ countdown > 0 ? `${countdown}秒后重发` : '获取验证码' }}
+            </el-button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">验证码</label>
           <input 
-            v-model="registerForm.email" 
-            type="email" 
+            v-model="registerForm.verifyCode" 
+            type="text" 
             class="form-input" 
-            placeholder="请输入邮箱"
+            placeholder="请输入邮箱验证码"
+            maxlength="6"
             required
           />
         </div>
@@ -74,7 +97,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { register } from '../api'
+import { register, sendVerifyCode as sendVerifyCodeApi } from '../api'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
@@ -82,12 +106,32 @@ const registerForm = ref({
   username: '',
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  verifyCode: ''
 })
 
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const countdown = ref(0)
+
+const handleSendVerifyCode = async () => {
+  try {
+    await sendVerifyCodeApi(registerForm.value.email)
+    ElMessage.success('验证码已发送，请查收邮箱')
+    
+    // 开始倒计时
+    countdown.value = 60
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '发送验证码失败')
+  }
+}
 
 const handleRegister = async () => {
   errorMessage.value = ''
@@ -98,13 +142,19 @@ const handleRegister = async () => {
     return
   }
   
+  if (!registerForm.value.verifyCode) {
+    errorMessage.value = '请输入验证码'
+    return
+  }
+  
   loading.value = true
   
   try {
     await register({
       username: registerForm.value.username,
       email: registerForm.value.email,
-      password: registerForm.value.password
+      password: registerForm.value.password,
+      verifyCode: registerForm.value.verifyCode
     })
     
     successMessage.value = '注册成功，请登录'

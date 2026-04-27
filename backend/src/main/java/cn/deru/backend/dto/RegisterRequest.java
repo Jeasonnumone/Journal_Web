@@ -13,4 +13,6 @@ public class RegisterRequest {
 
     @Sensitive(type = SensitiveType.EMAIL)
     private String email;
+
+    private String verifyCode;
 }

@@ -62,6 +62,11 @@ export const logout = () => {
   return apiClient.post('/api/auth/logout')
 }
 
+// 发送注册验证码
+export const sendVerifyCode = (email) => {
+  return apiClient.post('/api/auth/verify-code', { email })
+}
+
 // 获取期刊列表
 export const getJournals = (params = {}) => {
   return apiClient.get('/api/journals', { params })

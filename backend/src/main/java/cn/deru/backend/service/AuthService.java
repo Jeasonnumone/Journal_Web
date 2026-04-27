@@ -8,6 +8,8 @@ import cn.deru.backend.dto.UserDTO;
 import cn.deru.backend.model.User;
 import cn.deru.backend.repository.UserRepository;
 import cn.deru.backend.util.JwtUtil;
+import cn.deru.backend.util.VerifyCodeUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,16 +24,36 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
+    private final EmailService emailService;
     
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate redisTemplate) {
+    @Value("${verify.code.length:6}")
+    private int codeLength;
+    
+    @Value("${verify.code.expire:300}")
+    private int codeExpire;
+    
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, StringRedisTemplate redisTemplate, EmailService emailService) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.redisTemplate = redisTemplate;
+        this.emailService = emailService;
     }
     
     // 注册
     public UserDTO register(RegisterRequest request) {
+        // 验证邮箱验证码
+        String redisKey = "verify_code:" + request.getEmail();
+        String savedCode = redisTemplate.opsForValue().get(redisKey);
+        
+        if (savedCode == null) {
+            throw new RuntimeException("验证码已过期或未发送");
+        }
+        
+        if (!savedCode.equals(request.getVerifyCode())) {
+            throw new RuntimeException("验证码错误");
+        }
+        
         // 检查用户名是否存在
         if (userRepository.findByUsername(request.getUsername()) != null) {
             throw new RuntimeException("用户名已存在");
@@ -44,6 +66,10 @@ public class AuthService {
         user.setRole("USER");
         
         userRepository.insert(user);
+        
+        // 删除已使用的验证码
+        redisTemplate.delete(redisKey);
+        
         return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
     }
     
@@ -139,15 +165,31 @@ public class AuthService {
     // 退出登录 - 删除 Redis 中的 Refresh Token
     public void logout(String refreshToken) {
         try {
-            // 从 Refresh Token 中获取 userId
             Long userId = jwtUtil.getUserIdFromToken(refreshToken);
-            
-            // 从 Redis 中删除 Refresh Token
             String redisKey = "refresh_token:" + userId;
             redisTemplate.delete(redisKey);
         } catch (Exception e) {
-            // 如果解析失败，忽略错误
             e.printStackTrace();
         }
+    }
+    
+    // 发送验证码
+    public void sendVerifyCode(String email) {
+        // 检查邮箱是否已注册
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            throw new RuntimeException("该邮箱已被注册");
+        }
+        
+        // 生成验证码
+        String code = VerifyCodeUtil.generateCode(codeLength);
+
+        // 发送邮件
+        emailService.sendVerifyCode(email, code);
+        
+        // 存储到 Redis
+        String redisKey = "verify_code:" + email;
+        redisTemplate.opsForValue().set(redisKey, code, codeExpire, TimeUnit.SECONDS);
+
     }
 }
