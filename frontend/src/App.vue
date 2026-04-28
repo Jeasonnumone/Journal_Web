@@ -17,6 +17,8 @@
     </header>
 
     <router-view />
+    
+    <Footer />
   </div>
 </template>
 
@@ -24,6 +26,7 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { currentUser, initUser, logout } from './composables/useAuth.js'
+import Footer from './components/Footer.vue'
 
 const router = useRouter()
 
