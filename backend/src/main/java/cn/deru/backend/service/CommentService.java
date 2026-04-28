@@ -2,6 +2,7 @@ package cn.deru.backend.service;
 
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
+import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.mapper.CommentMapper;
 import cn.deru.backend.model.Comment;
 import cn.deru.backend.model.User;
@@ -117,5 +118,12 @@ public class CommentService {
                 commentMapper.updateById(rootComment);
             }
         }
+    }
+    
+    /**
+     * 查询最新评论（跨期刊）
+     */
+    public java.util.List<RecentCommentDTO> getRecentComments(Integer limit) {
+        return commentMapper.selectRecentComments(limit);
     }
 }

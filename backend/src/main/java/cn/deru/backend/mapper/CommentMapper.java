@@ -1,6 +1,7 @@
 package cn.deru.backend.mapper;
 
 import cn.deru.backend.dto.CommentDTO;
+import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.model.Comment;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -36,4 +37,18 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "AND c.is_deleted = 0 " +
             "ORDER BY c.create_time DESC")
     IPage<CommentDTO> selectReplies(Page<CommentDTO> page, @Param("rootId") Long rootId);
+    
+    /**
+     * 查询最新评论（跨期刊，关联期刊表，只查根评论）
+     */
+    @Select("SELECT c.id, c.journal_id, c.user_id, c.content, c.create_time, " +
+            "u.username, j.title as journal_title " +
+            "FROM comments c " +
+            "LEFT JOIN user u ON c.user_id = u.id " +
+            "LEFT JOIN journal j ON c.journal_id = j.id " +
+            "WHERE (c.parent_id IS NULL OR c.root_id = c.id) " +
+            "AND c.is_deleted = 0 " +
+            "ORDER BY c.create_time DESC " +
+            "LIMIT #{limit}")
+    java.util.List<RecentCommentDTO> selectRecentComments(@Param("limit") Integer limit);
 }

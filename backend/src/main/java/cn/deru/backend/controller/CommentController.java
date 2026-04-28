@@ -2,6 +2,7 @@ package cn.deru.backend.controller;
 
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
+import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.service.CommentService;
 import cn.deru.backend.model.Result;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -42,6 +43,17 @@ public class CommentController {
     ) {
         IPage<CommentDTO> replies = commentService.getReplies(rootId, page, pageSize);
         return Result.success(replies);
+    }
+    
+    /**
+     * 查询最新评论（跨期刊）
+     */
+    @GetMapping("/recent")
+    public Result<java.util.List<RecentCommentDTO>> getRecentComments(
+        @RequestParam(defaultValue = "10") Integer limit
+    ) {
+        java.util.List<RecentCommentDTO> comments = commentService.getRecentComments(limit);
+        return Result.success(comments);
     }
     
     /**

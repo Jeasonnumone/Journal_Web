@@ -146,4 +146,9 @@ export const deleteComment = (commentId) => {
   return apiClient.delete(`/api/comments/${commentId}`)
 }
 
+// 获取最新评论（跨期刊）
+export const getRecentComments = (limit = 10) => {
+  return apiClient.get('/api/comments/recent', { params: { limit } })
+}
+
 export default apiClient
