@@ -5,6 +5,8 @@ import cn.deru.backend.dto.LoginResponse;
 import cn.deru.backend.dto.RefreshTokenResponse;
 import cn.deru.backend.dto.RegisterRequest;
 import cn.deru.backend.dto.UserDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.model.User;
 import cn.deru.backend.repository.UserRepository;
 import cn.deru.backend.util.JwtUtil;
@@ -47,16 +49,16 @@ public class AuthService {
         String savedCode = redisTemplate.opsForValue().get(redisKey);
         
         if (savedCode == null) {
-            throw new RuntimeException("验证码已过期或未发送");
+            throw new BusinessException(BusinessCode.VERIFY_CODE_EXPIRED);
         }
         
         if (!savedCode.equals(request.getVerifyCode())) {
-            throw new RuntimeException("验证码错误");
+            throw new BusinessException(BusinessCode.VERIFY_CODE_ERROR);
         }
         
         // 检查用户名是否存在
         if (userRepository.findByUsername(request.getUsername()) != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new BusinessException(BusinessCode.USER_ALREADY_EXISTS);
         }
         
         User user = new User();
@@ -178,7 +180,7 @@ public class AuthService {
         // 检查邮箱是否已注册
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            throw new RuntimeException("该邮箱已被注册");
+            throw new BusinessException(BusinessCode.EMAIL_ALREADY_EXISTS);
         }
         
         // 生成验证码

@@ -129,7 +129,7 @@ const handleSendVerifyCode = async () => {
       }
     }, 1000)
   } catch (error) {
-    ElMessage.error(error.response?.data?.message || '发送验证码失败')
+    // 错误已由 axios 拦截器处理
   }
 }
 
@@ -162,7 +162,7 @@ const handleRegister = async () => {
       router.push('/login')
     }, 1500)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || '注册失败，请稍后重试'
+    // 错误已由 axios 拦截器处理
   } finally {
     loading.value = false
   }

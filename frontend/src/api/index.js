@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
+import router from '../router'
 
 const API_BASE_URL = 'http://localhost:8081'
 
@@ -25,13 +27,51 @@ apiClient.interceptors.request.use(
   }
 )
 
-// 响应拦截器 - 统一处理错误
+// 响应拦截器 - 根据自定义业务码处理
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const { code, message } = response.data
+    
+    // 成功响应
+    if (code === 200) {
+      return response
+    }
+    
+    // 根据自定义业务码处理
+    switch (code) {
+      case 4010: // 未登录/登录过期
+        localStorage.removeItem('accessToken')
+        router.push('/login')
+        ElMessage.error('登录已过期，请重新登录')
+        break
+        
+      case 4011: // Token 无效
+        localStorage.removeItem('accessToken')
+        router.push('/login')
+        ElMessage.error('登录状态无效')
+        break
+        
+      case 4030: // 权限不足
+        ElMessage.error('权限不足，无法操作')
+        break
+        
+      case 4040: // 资源不存在
+        ElMessage.error('资源不存在')
+        break
+        
+      default:
+        // 其他业务错误
+        ElMessage.error(message || '操作失败')
+    }
+    
+    return Promise.reject(response.data)
+  },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken')
-      throw new Error('Unauthorized')
+    // 网络错误等非业务错误
+    if (!error.response) {
+      ElMessage.error('网络错误，请检查网络连接')
+    } else {
+      ElMessage.error('服务器错误，请稍后重试')
     }
     return Promise.reject(error)
   }
