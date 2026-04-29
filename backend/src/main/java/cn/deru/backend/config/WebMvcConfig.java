@@ -21,11 +21,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 // 放行登录、注册接口以及期刊浏览接口
                 .excludePathPatterns(
                     "/api/auth/register", 
-                    "/api/auth/login", 
-                    "/api/journals/**", 
+                    "/api/auth/login",
                     "/api/auth/refresh",
+                    "/api/journals/**",
                     "/api/auth/verify-code",
 //                    "/api/comments/**"
+                    "/api/comments/recent",
                     "/api/comments/journal/**" // 查看评论不需要登录
                 );
     }
