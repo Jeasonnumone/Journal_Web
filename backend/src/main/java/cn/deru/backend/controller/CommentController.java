@@ -5,6 +5,7 @@ import cn.deru.backend.dto.CommentRequest;
 import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.service.CommentService;
 import cn.deru.backend.model.Result;
+import cn.deru.backend.util.UserContext;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,23 @@ public class CommentController {
         @RequestParam(defaultValue = "10") Integer limit
     ) {
         java.util.List<RecentCommentDTO> comments = commentService.getRecentComments(limit);
+        return Result.success(comments);
+    }
+    
+    /**
+     * 查询我的评论
+     */
+    @GetMapping("/user")
+    public Result<IPage<RecentCommentDTO>> getUserComments(
+        @RequestParam(defaultValue = "1") Integer page,
+        @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            return Result.error(4010, "请先登录");
+        }
+        
+        IPage<RecentCommentDTO> comments = commentService.getUserComments(userId, page, pageSize);
         return Result.success(comments);
     }
     

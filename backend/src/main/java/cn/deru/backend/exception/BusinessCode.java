@@ -12,6 +12,7 @@ public enum BusinessCode {
     
     UNAUTHORIZED(4010, "未登录或登录已过期"),
     TOKEN_INVALID(4011, "Token 无效"),
+    PASSWORD_ERROR(4012, "密码错误"),
     
     FORBIDDEN(4030, "权限不足"),
     

@@ -6,6 +6,7 @@ import RegisterPage from '../views/RegisterPage.vue'
 import PostDetail from '../views/PostDetail.vue'
 import PublishPost from '../views/PublishPost.vue'
 import EditPost from '../views/EditPost.vue'
+import ProfilePage from '../views/ProfilePage.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -14,7 +15,8 @@ const routes = [
   { path: '/register', component: RegisterPage },
   { path: '/posts/publish', component: PublishPost, meta: { requiresAuth: true } },
   { path: '/posts/:id', component: PostDetail },
-  { path: '/posts/:id/edit', component: EditPost, meta: { requiresAuth: true } }
+  { path: '/posts/:id/edit', component: EditPost, meta: { requiresAuth: true } },
+  { path: '/profile', component: ProfilePage, meta: { requiresAuth: true } }
 ]
 
 const router = createRouter({

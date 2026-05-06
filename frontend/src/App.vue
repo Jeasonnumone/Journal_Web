@@ -6,6 +6,7 @@
         <div class="user-info">
           <template v-if="currentUser">
             <span class="welcome">欢迎，{{ currentUser.username }}</span>
+            <el-button type="warning" plain size="small" @click="router.push('/profile')">个人中心</el-button>
             <el-button type="primary" plain size="small" @click="handleLogout">退出登录</el-button>
           </template>
           <template v-else>

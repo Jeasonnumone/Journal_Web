@@ -18,7 +18,7 @@
             v-model="postForm.content" 
             type="textarea" 
             placeholder="请输入帖子内容..."
-            :rows="10"
+            :rows="30"
             maxlength="5000"
             show-word-limit
           />

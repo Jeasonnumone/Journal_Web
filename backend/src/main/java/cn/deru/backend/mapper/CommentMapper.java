@@ -51,4 +51,18 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "ORDER BY c.create_time DESC " +
             "LIMIT #{limit}")
     java.util.List<RecentCommentDTO> selectRecentComments(@Param("limit") Integer limit);
+    
+    /**
+     * 分页查询用户的评论
+     */
+    @Select("SELECT c.id, c.journal_id, c.user_id, c.content, c.create_time, " +
+            "u.username, j.title as journal_title " +
+            "FROM comments c " +
+            "LEFT JOIN user u ON c.user_id = u.id " +
+            "LEFT JOIN journal j ON c.journal_id = j.id " +
+            "WHERE c.user_id = #{userId} " +
+            "AND (c.parent_id IS NULL OR c.root_id = c.id) " +
+            "AND c.is_deleted = 0 " +
+            "ORDER BY c.create_time DESC")
+    IPage<RecentCommentDTO> selectUserComments(Page<RecentCommentDTO> page, @Param("userId") Long userId);
 }

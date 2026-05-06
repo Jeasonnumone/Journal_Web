@@ -126,4 +126,12 @@ public class CommentService {
     public java.util.List<RecentCommentDTO> getRecentComments(Integer limit) {
         return commentMapper.selectRecentComments(limit);
     }
+    
+    /**
+     * 查询用户的评论
+     */
+    public IPage<RecentCommentDTO> getUserComments(Long userId, Integer page, Integer pageSize) {
+        Page<RecentCommentDTO> commentPage = new Page<>(page, pageSize);
+        return commentMapper.selectUserComments(commentPage, userId);
+    }
 }

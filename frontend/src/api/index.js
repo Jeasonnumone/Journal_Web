@@ -176,4 +176,19 @@ export const deletePost = (id) => {
   return apiClient.delete(`/api/posts/${id}`)
 }
 
+// 获取个人信息
+export const getUserProfile = () => {
+  return apiClient.get('/api/user/profile')
+}
+
+// 修改密码
+export const changePassword = (data) => {
+  return apiClient.put('/api/user/password', data)
+}
+
+// 获取我的评论
+export const getUserComments = (page = 1, pageSize = 10) => {
+  return apiClient.get('/api/comments/user', { params: { page, pageSize } })
+}
+
 export default apiClient

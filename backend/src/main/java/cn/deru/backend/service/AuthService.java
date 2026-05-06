@@ -72,7 +72,7 @@ public class AuthService {
         // 删除已使用的验证码
         redisTemplate.delete(redisKey);
         
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), user.getCreateTime());
     }
     
     // 登录 - 返回 Access Token 和 Refresh Token
@@ -161,7 +161,7 @@ public class AuthService {
     // 获取当前登录用户
     public UserDTO getCurrentUser(String username) {
         User user = userRepository.findByUsername(username);
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), user.getCreateTime());
     }
     
     // 退出登录 - 删除 Redis 中的 Refresh Token
@@ -193,5 +193,22 @@ public class AuthService {
         String redisKey = "verify_code:" + email;
         redisTemplate.opsForValue().set(redisKey, code, codeExpire, TimeUnit.SECONDS);
 
+    }
+    
+    // 修改密码
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "用户不存在");
+        }
+        
+        // 验证旧密码
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new BusinessException(BusinessCode.PASSWORD_ERROR, "旧密码错误");
+        }
+        
+        // 更新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.updateById(user);
     }
 }
