@@ -151,4 +151,29 @@ export const getRecentComments = (limit = 10) => {
   return apiClient.get('/api/comments/recent', { params: { limit } })
 }
 
+// 获取最新帖子
+export const getRecentPosts = (page = 1, pageSize = 10) => {
+  return apiClient.get('/api/posts/recent', { params: { page, pageSize } })
+}
+
+// 获取帖子详情
+export const getPostById = (id) => {
+  return apiClient.get(`/api/posts/${id}`)
+}
+
+// 发表帖子
+export const createPost = (data) => {
+  return apiClient.post('/api/posts', data)
+}
+
+// 修改帖子
+export const updatePost = (id, data) => {
+  return apiClient.put(`/api/posts/${id}`, data)
+}
+
+// 删除帖子
+export const deletePost = (id) => {
+  return apiClient.delete(`/api/posts/${id}`)
+}
+
 export default apiClient

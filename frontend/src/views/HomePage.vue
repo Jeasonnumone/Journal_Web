@@ -41,6 +41,42 @@
       />
     </div>
 
+    <div class="recent-posts">
+      <div class="section-header">
+        <el-icon><Document /></el-icon>
+        <span class="section-title">最新帖子</span>
+        <el-button type="primary" size="small" @click="router.push('/posts/publish')" v-if="currentUser">
+          发表帖子
+        </el-button>
+      </div>
+      
+      <div v-if="recentPosts.length === 0" class="empty-posts">
+        <el-empty description="暂无帖子，快来发表第一篇吧！" />
+      </div>
+      
+      <div v-else class="post-list">
+        <div 
+          v-for="post in recentPosts" 
+          :key="post.id" 
+          class="post-item"
+          @click="goToPost(post.id)"
+        >
+          <el-avatar :size="36" :icon="UserFilled" class="post-avatar" />
+          <div class="post-body">
+            <div class="post-header">
+              <h3 class="post-title">{{ post.title }}</h3>
+              <div class="post-meta">
+                <span class="post-user">{{ post.username || '匿名用户' }}</span>
+                <span class="post-time">{{ formatTime(post.createTime) }}</span>
+                <span class="post-views">👁 {{ post.viewCount || 0 }} 浏览</span>
+              </div>
+            </div>
+            <div class="post-content">{{ post.content }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="recent-comments">
       <div class="section-header">
         <el-icon><ChatDotRound /></el-icon>
@@ -77,8 +113,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getCategories, getJournals, getRecentComments } from '../api/index.js'
-import { ChatDotRound, UserFilled } from '@element-plus/icons-vue'
+import { getCategories, getJournals, getRecentComments, getRecentPosts } from '../api/index.js'
+import { ChatDotRound, UserFilled, Document } from '@element-plus/icons-vue'
+import { currentUser } from '../composables/useAuth.js'
 
 const router = useRouter()
 
@@ -91,6 +128,7 @@ const itemsPerPage = ref(6)
 const total = ref(0)
 const totalPages = ref(0)
 const recentComments = ref([])
+const recentPosts = ref([])
 
 const fetchCategories = async () => {
   try {
@@ -127,6 +165,15 @@ const fetchRecentComments = async () => {
   }
 }
 
+const fetchRecentPosts = async () => {
+  try {
+    const { data } = await getRecentPosts(1, 5)
+    recentPosts.value = data.data?.records || []
+  } catch (error) {
+    console.error('获取最新帖子失败:', error)
+  }
+}
+
 const search = () => {
   pageNum.value = 1
   fetchJournals()
@@ -144,6 +191,10 @@ const viewDetail = (id) => {
 
 const goToJournal = (id) => {
   router.push(`/journal/${id}`)
+}
+
+const goToPost = (id) => {
+  router.push(`/posts/${id}`)
 }
 
 const formatTime = (time) => {
@@ -164,6 +215,7 @@ onMounted(async () => {
   await fetchCategories()
   await fetchJournals()
   await fetchRecentComments()
+  await fetchRecentPosts()
 })
 </script>
 
@@ -324,6 +376,108 @@ onMounted(async () => {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.recent-posts {
+  margin-top: 3rem;
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.section-header .el-icon {
+  font-size: 1.25rem;
+  color: #409eff;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.empty-posts {
+  padding: 2rem 0;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.post-item:hover {
+  background-color: #f5f7fa;
+}
+
+.post-avatar {
+  flex-shrink: 0;
+}
+
+.post-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-header {
+  margin-bottom: 0.5rem;
+}
+
+.post-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.post-user {
+  font-weight: 500;
+  color: #409eff;
+}
+
+.post-time {
+  color: #c0c4cc;
+}
+
+.post-views {
+  color: #909399;
+}
+
+.post-content {
+  color: #606266;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 </style>

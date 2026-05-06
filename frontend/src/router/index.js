@@ -3,17 +3,31 @@ import HomePage from '../views/HomePage.vue'
 import JournalDetail from '../views/JournalDetail.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
+import PostDetail from '../views/PostDetail.vue'
+import PublishPost from '../views/PublishPost.vue'
 
 const routes = [
   { path: '/', component: HomePage },
   { path: '/journal/:id', component: JournalDetail },
   { path: '/login', component: LoginPage },
-  { path: '/register', component: RegisterPage }
+  { path: '/register', component: RegisterPage },
+  { path: '/posts/publish', component: PublishPost },
+  { path: '/posts/:id', component: PostDetail }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('accessToken')
+  
+  if (to.path === '/posts/publish' && !token) {
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router
