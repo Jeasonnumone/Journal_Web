@@ -11,7 +11,7 @@ const routes = [
   { path: '/journal/:id', component: JournalDetail },
   { path: '/login', component: LoginPage },
   { path: '/register', component: RegisterPage },
-  { path: '/posts/publish', component: PublishPost },
+  { path: '/posts/publish', component: PublishPost, meta: { requiresAuth: true } },
   { path: '/posts/:id', component: PostDetail }
 ]
 
@@ -23,7 +23,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('accessToken')
   
-  if (to.path === '/posts/publish' && !token) {
+  if (to.meta.requiresAuth && !token) {
     next('/login')
   } else {
     next()
