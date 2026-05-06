@@ -3,14 +3,14 @@
     <div class="post-container" v-if="post">
       <div class="post-header">
         <h1 class="post-title">{{ post.title }}</h1>
-        <div class="post-meta">
-          <el-avatar :size="40" :icon="UserFilled" />
-          <div class="meta-info">
-            <span class="username">{{ post.username }}</span>
-            <span class="time">{{ formatTime(post.createTime) }}</span>
-          </div>
-          <div class="post-stats">
-            <span>👁 {{ post.viewCount }} 浏览</span>
+        <div class="post-author">
+          <el-avatar :size="48" :icon="UserFilled" class="author-avatar" />
+          <div class="author-info">
+            <span class="author-name">作者：{{ post.username }}</span>
+            <span class="meta-divider">|</span>
+            <span>发布日期：{{ formatTime(post.createTime) }}</span>
+            <span class="meta-divider">|</span>
+            <span>浏览量：{{ post.viewCount || 0 }}</span>
           </div>
         </div>
       </div>
@@ -117,32 +117,33 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.post-meta {
+.post-author {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.meta-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.author-avatar {
+  flex-shrink: 0;
+  background-color: #e8e8e8;
 }
 
-.username {
+.author-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #409eff;
+  font-size: 0.9rem;
+}
+
+.author-name {
   font-weight: 500;
   color: #409eff;
 }
 
-.time {
-  font-size: 0.85rem;
-  color: #909399;
-}
-
-.post-stats {
-  color: #909399;
-  font-size: 0.9rem;
+.meta-divider {
+  color: #ddd;
 }
 
 .post-content {
