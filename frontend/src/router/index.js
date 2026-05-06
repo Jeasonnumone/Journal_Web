@@ -5,6 +5,7 @@ import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import PostDetail from '../views/PostDetail.vue'
 import PublishPost from '../views/PublishPost.vue'
+import EditPost from '../views/EditPost.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -12,7 +13,8 @@ const routes = [
   { path: '/login', component: LoginPage },
   { path: '/register', component: RegisterPage },
   { path: '/posts/publish', component: PublishPost, meta: { requiresAuth: true } },
-  { path: '/posts/:id', component: PostDetail }
+  { path: '/posts/:id', component: PostDetail },
+  { path: '/posts/:id/edit', component: EditPost, meta: { requiresAuth: true } }
 ]
 
 const router = createRouter({
