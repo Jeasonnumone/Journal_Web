@@ -37,6 +37,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getPostById, deletePost } from '../api/index.js'
 import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { currentUser } from '../composables/useAuth.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,8 +49,7 @@ const fetchPost = async () => {
     const { data } = await getPostById(route.params.id)
     post.value = data.data
     
-    const userId = localStorage.getItem('userId')
-    isOwner.value = post.value.userId == userId
+    isOwner.value = currentUser.value && post.value.userId === currentUser.value.id
   } catch (error) {
     console.error('获取帖子失败:', error)
   }
