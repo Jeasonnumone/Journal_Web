@@ -39,7 +39,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setContentType("application/json;charset=UTF-8");
             Result<Void> result = Result.error(BusinessCode.UNAUTHORIZED.getCode(), BusinessCode.UNAUTHORIZED.getMessage());
             response.getWriter().write(objectMapper.writeValueAsString(result));
-            log.warn("请求无 token，被拦截返回");
+            log.warn("请求无 token，被拦截返回，接口：{}", request.getRequestURI());
             return false;
         }
         
@@ -61,7 +61,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 response.setContentType("application/json;charset=UTF-8");
                 Result<Void> result = Result.error(BusinessCode.TOKEN_INVALID.getCode(), "Token 已过期");
                 response.getWriter().write(objectMapper.writeValueAsString(result));
-                log.warn("token 时间过期");
+                log.warn("token 时间过期，接口：{}", request.getRequestURI());
                 return false;
             }
         } catch (Exception e) {
@@ -69,6 +69,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setContentType("application/json;charset=UTF-8");
             Result<Void> result = Result.error(BusinessCode.TOKEN_INVALID.getCode(), "Token 无效");
             response.getWriter().write(objectMapper.writeValueAsString(result));
+            log.warn("token 无效，接口：{}", request.getRequestURI());
             return false;
         }
     }
