@@ -360,7 +360,7 @@ onMounted(async () => {
 }
 
 .comment-journal {
-  color: #909399;
+  color: #606266;
 }
 
 .comment-time {

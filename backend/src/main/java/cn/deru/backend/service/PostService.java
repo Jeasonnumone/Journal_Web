@@ -13,12 +13,46 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class PostService {
     
     @Autowired
     private PostMapper postMapper;
+    
+    @Autowired
+    private PostViewCacheService postViewCacheService;
+    
+    /**
+     * 合并 Redis 中的浏览量数据到帖子列表（Redis 存储的是总量）
+     */
+    private void mergeRedisViewCount(List<PostDTO> posts) {
+        if (posts == null || posts.isEmpty()) {
+            return;
+        }
+        
+        // 提取所有帖子 ID
+        Set<Long> postIds = new HashSet<>();
+        for (PostDTO post : posts) {
+            postIds.add(post.getId());
+        }
+        
+        // 批量获取 Redis 中的浏览量（总量）
+        Map<Long, Long> redisViewCounts = postViewCacheService.getMultiViewCount(postIds);
+        
+        // 直接使用 Redis 的总量（如果 Redis 中有数据）
+        for (PostDTO post : posts) {
+            Long redisCount = redisViewCounts.get(post.getId());
+            if (redisCount != null && redisCount > 0) {
+                post.setViewCount(redisCount.intValue());
+            }
+        }
+    }
     
     /**
      * 发表帖子
@@ -42,7 +76,12 @@ public class PostService {
      */
     public IPage<PostDTO> getRecentPosts(Integer page, Integer pageSize) {
         Page<PostDTO> postPage = new Page<>(page, pageSize);
-        return postMapper.selectRecentPosts(postPage);
+        IPage<PostDTO> result = postMapper.selectRecentPosts(postPage);
+        
+        // 合并 Redis 中的浏览量数据
+        mergeRedisViewCount(result.getRecords());
+        
+        return result;
     }
     
     /**
@@ -54,8 +93,14 @@ public class PostService {
             throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "帖子不存在");
         }
         
-        // 增加浏览量
-        postMapper.incrementViewCount(id);
+        // 增加浏览量（更新到 Redis 缓存，存储的是总量）
+        postViewCacheService.incrementViewCount(id);
+        
+        // 直接使用 Redis 中的总量
+        Long redisCount = postViewCacheService.getViewCount(id);
+        if (redisCount != null && redisCount > 0) {
+            post.setViewCount(redisCount.intValue());
+        }
         
         return post;
     }
@@ -65,7 +110,12 @@ public class PostService {
      */
     public IPage<PostDTO> getUserPosts(Long userId, Integer page, Integer pageSize) {
         Page<PostDTO> postPage = new Page<>(page, pageSize);
-        return postMapper.selectUserPosts(postPage, userId);
+        IPage<PostDTO> result = postMapper.selectUserPosts(postPage, userId);
+        
+        // 合并 Redis 中的浏览量数据
+        mergeRedisViewCount(result.getRecords());
+        
+        return result;
     }
     
     /**

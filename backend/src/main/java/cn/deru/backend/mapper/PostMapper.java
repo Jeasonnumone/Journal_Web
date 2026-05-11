@@ -41,6 +41,12 @@ public interface PostMapper extends BaseMapper<Post> {
     void incrementViewCount(@Param("id") Long id);
     
     /**
+     * 更新浏览量为指定值（用于定时任务同步 Redis 总量数据）
+     */
+    @Update("UPDATE posts SET view_count = #{count} WHERE id = #{id}")
+    void updateViewCount(@Param("id") Long id, @Param("count") Integer count);
+    
+    /**
      * 查询用户的帖子
      */
     @Select("SELECT p.*, u.username " +
