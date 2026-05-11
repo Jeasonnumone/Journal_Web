@@ -16,7 +16,7 @@
           <h4 class="post-title">{{ post.title }}</h4>
           <div class="post-meta">
             <span>发布于 {{ formatTime(post.createTime) }}</span>
-            <span>浏览 {{ post.viewCount || 0 }}</span>
+            <span>浏览量 {{ post.viewCount || 0 }}</span>
           </div>
         </div>
         <div class="post-actions">

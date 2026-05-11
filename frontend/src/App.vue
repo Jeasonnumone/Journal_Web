@@ -26,7 +26,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { currentUser, initUser, logout } from './composables/useAuth.js'
+import { currentUser, initUser, logout, refreshTokens } from './composables/useAuth.js'
 import Footer from './components/Footer.vue'
 
 const router = useRouter()
@@ -36,7 +36,10 @@ const handleLogout = async () => {
   router.push('/')
 }
 
-onMounted(initUser)
+onMounted(async () => {
+  await refreshTokens()
+  await initUser()
+})
 </script>
 
 <style scoped>
