@@ -7,7 +7,7 @@
 
     <div class="categories">
       <el-button 
-        v-for="category in categories" 
+        v-for="category in displayedCategories" 
         :key="category"
         @click="selectCategory(category)"
         :type="selectedCategory === category ? 'primary' : 'default'"
@@ -15,7 +15,36 @@
       >
         {{ category }}
       </el-button>
+      <el-button 
+        v-if="categories.length > maxVisibleCategories"
+        @click="showAllCategoriesDialog = true"
+        type="info"
+        plain
+        round
+      >
+        更多 ▼
+      </el-button>
     </div>
+
+    <el-dialog 
+      v-model="showAllCategoriesDialog" 
+      title="所有期刊分类" 
+      width="600px"
+      :close-on-click-modal="true"
+    >
+      <div class="all-categories-dialog">
+        <el-button 
+          v-for="category in categories" 
+          :key="category"
+          @click="handleCategorySelect(category)"
+          :type="selectedCategory === category ? 'primary' : 'default'"
+          round
+          class="category-btn"
+        >
+          {{ category }}
+        </el-button>
+      </div>
+    </el-dialog>
 
     <div class="journal-grid">
       <el-card 
@@ -25,9 +54,12 @@
         class="journal-card"
         shadow="hover"
       >
-        <img :src="journal.cover || '/default-cover.jpg'" alt="封面" class="journal-cover" />
+        <img :src="journal.coverPath || '/default-cover.jpg'" alt="封面" class="journal-cover" />
         <h3 class="journal-title">{{ journal.title }}</h3>
-        <p class="journal-author">作者：{{ journal.author }}</p>
+        <p class="journal-organizer">{{ journal.organizer || '未知主办单位' }}</p>
+        <div class="journal-tags" v-if="journal.compositeImpactFactor">
+          <el-tag size="small" type="success">影响因子：{{ journal.compositeImpactFactor }}</el-tag>
+        </div>
       </el-card>
     </div>
 
@@ -111,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategories, getJournals, getRecentComments, getRecentPosts } from '../api/index.js'
 import { ChatDotRound, UserFilled, Document } from '@element-plus/icons-vue'
@@ -129,6 +161,12 @@ const total = ref(0)
 const totalPages = ref(0)
 const recentComments = ref([])
 const recentPosts = ref([])
+const showAllCategoriesDialog = ref(false)
+const maxVisibleCategories = 8
+
+const displayedCategories = computed(() => {
+  return categories.value.slice(0, maxVisibleCategories)
+})
 
 const fetchCategories = async () => {
   try {
@@ -183,6 +221,11 @@ const selectCategory = (category) => {
   selectedCategory.value = category
   pageNum.value = 1
   fetchJournals()
+}
+
+const handleCategorySelect = (category) => {
+  selectCategory(category)
+  showAllCategoriesDialog.value = false
 }
 
 const viewDetail = (id) => {
@@ -274,10 +317,14 @@ onMounted(async () => {
   font-size: 1.1rem;
 }
 
-.journal-author {
+.journal-organizer {
   color: #666;
   font-size: 0.85rem;
   margin: 0;
+}
+
+.journal-tags {
+  margin-top: 0.5rem;
 }
 
 .pagination {
@@ -387,26 +434,6 @@ onMounted(async () => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #eee;
-}
-
-.section-header .el-icon {
-  font-size: 1.25rem;
-  color: #409eff;
-}
-
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
-}
-
 .empty-posts {
   padding: 2rem 0;
 }
@@ -479,5 +506,16 @@ onMounted(async () => {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+}
+
+.all-categories-dialog {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.category-btn {
+  margin: 0;
 }
 </style>

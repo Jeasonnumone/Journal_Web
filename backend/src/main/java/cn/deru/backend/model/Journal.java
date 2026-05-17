@@ -10,16 +10,30 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("journal")
+@TableName("journals")
 public class Journal {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private Integer jid;
+    private Integer typeid;
+    private String coverPath;
     private String title;
-    private String author;
-    private Long categoryId;
-    private String cover;
-    private String description;
-    private String publisher;
+    private String department;
+    private String organizer;
+    private String editorialOffice;
+    private String address;
+    private String postalCode;
+    private String phone;
+    private String email;
+    private String emailIssue;
+    private String website;
+    private String cnNumber;
     private String issn;
+    private String postalCodeSubscription;
+    private String price;
+    private String compositeImpactFactor;
+    private String comprehensiveImpactFactor;
+    private String introduction;
+    private java.sql.Timestamp createdAt;
 }

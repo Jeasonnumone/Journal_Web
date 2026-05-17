@@ -8,7 +8,9 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface JournalCategoryRepository extends BaseMapper<JournalCategory> {
 
-    // 根据分类名称查询分类
-    @Select("SELECT * FROM journal_category WHERE name = #{name}")
+    @Select("SELECT * FROM journal_categories WHERE name = #{name}")
     JournalCategory findByName(String name);
+
+    @Select("SELECT * FROM journal_categories WHERE typeid = #{typeid}")
+    JournalCategory findByTypeid(Integer typeid);
 }

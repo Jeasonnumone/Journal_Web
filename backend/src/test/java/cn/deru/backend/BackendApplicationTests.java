@@ -50,6 +50,9 @@ class BackendApplicationTests {
 
         System.out.println(multiply("0", "0"));
 
+        Stack<String> stack = new Stack<>();
+
+
     }
 
 

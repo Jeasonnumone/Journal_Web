@@ -11,51 +11,39 @@ import java.util.List;
 @Mapper
 public interface JournalRepository extends BaseMapper<Journal> {
 
-    // 根据分类ID查询期刊（不分页）
-    @Select("SELECT * FROM journal WHERE category_id = #{categoryId}")
-    List<Journal> findByCategoryId(Long categoryId);
+    @Select("SELECT * FROM journals WHERE typeid = #{typeid}")
+    List<Journal> findByTypeid(Integer typeid);
 
-    // 根据标题包含关键词查询期刊（不分页）
-    @Select("SELECT * FROM journal WHERE title LIKE CONCAT('%', #{keyword}, '%')")
+    @Select("SELECT * FROM journals WHERE title LIKE CONCAT('%', #{keyword}, '%')")
     List<Journal> findByTitleContainingIgnoreCase(String keyword);
 
-    // 根据分类ID和标题包含关键词查询期刊（不分页）
-    @Select("SELECT * FROM journal WHERE category_id = #{categoryId} AND title LIKE CONCAT('%', #{keyword}, '%')")
-    List<Journal> findByCategoryIdAndTitleContainingIgnoreCase(@Param("categoryId") Long categoryId, @Param("keyword") String keyword);
+    @Select("SELECT * FROM journals WHERE typeid = #{typeid} AND title LIKE CONCAT('%', #{keyword}, '%')")
+    List<Journal> findByTypeidAndTitleContainingIgnoreCase(@Param("typeid") Integer typeid, @Param("keyword") String keyword);
 
-    // 分页查询所有期刊
-    @Select("SELECT * FROM journal LIMIT #{offset}, #{size}")
+    @Select("SELECT * FROM journals LIMIT #{offset}, #{size}")
     List<Journal> findAllPageable(@Param("offset") int offset, @Param("size") int size);
 
-    // 统计所有期刊数量
-    @Select("SELECT COUNT(*) FROM journal")
+    @Select("SELECT COUNT(*) FROM journals")
     long countAll();
 
-    // 分页查询指定分类的期刊
-    @Select("SELECT * FROM journal WHERE category_id = #{categoryId} LIMIT #{offset}, #{size}")
-    List<Journal> findByCategoryIdPageable(@Param("categoryId") Long categoryId, @Param("offset") int offset, @Param("size") int size);
+    @Select("SELECT * FROM journals WHERE typeid = #{typeid} LIMIT #{offset}, #{size}")
+    List<Journal> findByTypeidPageable(@Param("typeid") Integer typeid, @Param("offset") int offset, @Param("size") int size);
 
-    // 统计指定分类的期刊数量
-    @Select("SELECT COUNT(*) FROM journal WHERE category_id = #{categoryId}")
-    long countByCategoryId(@Param("categoryId") Long categoryId);
+    @Select("SELECT COUNT(*) FROM journals WHERE typeid = #{typeid}")
+    long countByTypeid(@Param("typeid") Integer typeid);
 
-    // 分页查询标题包含关键词的期刊
-    @Select("SELECT * FROM journal WHERE title LIKE CONCAT('%', #{keyword}, '%') LIMIT #{offset}, #{size}")
+    @Select("SELECT * FROM journals WHERE title LIKE CONCAT('%', #{keyword}, '%') LIMIT #{offset}, #{size}")
     List<Journal> findByTitleContainingIgnoreCasePageable(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
 
-    // 统计标题包含关键词的期刊数量
-    @Select("SELECT COUNT(*) FROM journal WHERE title LIKE CONCAT('%', #{keyword}, '%')")
+    @Select("SELECT COUNT(*) FROM journals WHERE title LIKE CONCAT('%', #{keyword}, '%')")
     long countByTitleContainingIgnoreCase(@Param("keyword") String keyword);
 
-    // 分页查询指定分类且标题包含关键词的期刊
-    @Select("SELECT * FROM journal WHERE category_id = #{categoryId} AND title LIKE CONCAT('%', #{keyword}, '%') LIMIT #{offset}, #{size}")
-    List<Journal> findByCategoryIdAndTitleContainingIgnoreCasePageable(@Param("categoryId") Long categoryId, @Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+    @Select("SELECT * FROM journals WHERE typeid = #{typeid} AND title LIKE CONCAT('%', #{keyword}, '%') LIMIT #{offset}, #{size}")
+    List<Journal> findByTypeidAndTitleContainingIgnoreCasePageable(@Param("typeid") Integer typeid, @Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
 
-    // 统计指定分类且标题包含关键词的期刊数量
-    @Select("SELECT COUNT(*) FROM journal WHERE category_id = #{categoryId} AND title LIKE CONCAT('%', #{keyword}, '%')")
-    long countByCategoryIdAndTitleContainingIgnoreCase(@Param("categoryId") Long categoryId, @Param("keyword") String keyword);
+    @Select("SELECT COUNT(*) FROM journals WHERE typeid = #{typeid} AND title LIKE CONCAT('%', #{keyword}, '%')")
+    long countByTypeidAndTitleContainingIgnoreCase(@Param("typeid") Integer typeid, @Param("keyword") String keyword);
 
-    // 获取所有期刊分类
-    @Select("SELECT DISTINCT category_id FROM journal")
-    List<Long> findAllCategoryIds();
+    @Select("SELECT DISTINCT typeid FROM journals")
+    List<Integer> findAllTypeids();
 }

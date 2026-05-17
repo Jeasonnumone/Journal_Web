@@ -7,18 +7,31 @@
 
       <div v-if="journal" class="detail-body">
         <div class="detail-left">
-          <img :src="journal.cover || '/default-cover.jpg'" alt="封面" class="detail-cover" />
+          <img :src="journal.coverPath || '/default-cover.jpg'" alt="封面" class="detail-cover" />
         </div>
         <div class="detail-right">
           <h2 class="detail-title">{{ journal.title }}</h2>
           <div class="detail-info">
-            <p><strong>作者：</strong>{{ journal.author }}</p>
-            <p><strong>出版社：</strong>{{ journal.publisher }}</p>
-            <p><strong>ISSN：</strong>{{ journal.issn }}</p>
+            <p v-if="journal.department"><strong>主管部门：</strong>{{ journal.department }}</p>
+            <p v-if="journal.organizer"><strong>主办单位：</strong>{{ journal.organizer }}</p>
+            <p v-if="journal.editorialOffice"><strong>编辑部：</strong>{{ journal.editorialOffice }}</p>
+            <p v-if="journal.cnNumber"><strong>CN号：</strong>{{ journal.cnNumber }}</p>
+            <p v-if="journal.issn"><strong>ISSN：</strong>{{ journal.issn }}</p>
+            <p v-if="journal.compositeImpactFactor"><strong>复合影响因子：</strong>{{ journal.compositeImpactFactor }}</p>
+            <p v-if="journal.comprehensiveImpactFactor"><strong>综合影响因子：</strong>{{ journal.comprehensiveImpactFactor }}</p>
+            <p v-if="journal.price"><strong>定价：</strong>{{ journal.price }}</p>
+            <p v-if="journal.postalCodeSubscription"><strong>邮发代码：</strong>{{ journal.postalCodeSubscription }}</p>
+            <p v-if="journal.address"><strong>地址：</strong>{{ journal.address }}</p>
+            <p v-if="journal.postalCode"><strong>邮编：</strong>{{ journal.postalCode }}</p>
+            <p v-if="journal.phone"><strong>电话：</strong>{{ journal.phone }}</p>
+            <p v-if="journal.email"><strong>邮箱：</strong>{{ journal.email }}</p>
+            <p v-if="journal.website">
+              <strong>网址：</strong><a :href="journal.website" target="_blank" class="journal-link">{{ journal.website }}</a>
+            </p>
           </div>
-          <div class="detail-description">
+          <div class="detail-description" v-if="journal.introduction">
             <h3>简介</h3>
-            <p>{{ journal.description }}</p>
+            <p>{{ journal.introduction }}</p>
           </div>
         </div>
       </div>
@@ -111,6 +124,15 @@ onMounted(fetchJournal)
 .detail-info p {
   margin: 0.5rem 0;
   color: #666;
+}
+
+.journal-link {
+  color: #409eff;
+  text-decoration: none;
+}
+
+.journal-link:hover {
+  text-decoration: underline;
 }
 
 .detail-description h3 {

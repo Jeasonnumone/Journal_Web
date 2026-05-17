@@ -10,11 +10,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("journal_category")
+@TableName("journal_categories")
 public class JournalCategory {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private Integer typeid;
     private String name;
-    private String description;
+    private Integer parentId;
+    private java.sql.Timestamp createdAt;
 }
