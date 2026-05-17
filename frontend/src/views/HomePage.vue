@@ -55,7 +55,7 @@
         shadow="hover"
       >
         <img :src="journal.coverPath || '/default-cover.jpg'" alt="封面" class="journal-cover" />
-        <h3 class="journal-title">{{ journal.title }}</h3>
+        <h3 class="journal-title">{{ truncateTitle(journal.title) }}</h3>
         <p class="journal-organizer">{{ journal.organizer || '未知主办单位' }}</p>
         <div class="journal-tags" v-if="journal.compositeImpactFactor">
           <el-tag size="small" type="success">影响因子：{{ journal.compositeImpactFactor }}</el-tag>
@@ -258,6 +258,15 @@ const formatTime = (time) => {
   return date.toLocaleDateString('zh-CN')
 }
 
+const truncateTitle = (title) => {
+  if (!title) return ''
+  const index = title.indexOf('（')
+  if (index > 0) {
+    return title.substring(0, index)
+  }
+  return title
+}
+
 onMounted(async () => {
   await fetchCategories()
   await fetchJournals()
@@ -294,7 +303,7 @@ onMounted(async () => {
 
 .journal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.5rem;
 }
 
@@ -309,7 +318,7 @@ onMounted(async () => {
 
 .journal-cover {
   width: 100%;
-  height: 200px;
+  height: auto;
   object-fit: cover;
   border-radius: 5px;
   margin-bottom: 1rem;
