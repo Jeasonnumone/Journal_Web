@@ -8,12 +8,12 @@
     <div class="categories">
       <el-button 
         v-for="category in displayedCategories" 
-        :key="category"
+        :key="category.typeid"
         @click="selectCategory(category)"
-        :type="selectedCategory === category ? 'primary' : 'default'"
+        :type="selectedTypeid === category.typeid ? 'primary' : 'default'"
         round
       >
-        {{ category }}
+        {{ category.name }}
       </el-button>
       <el-button 
         v-if="categories.length > maxVisibleCategories"
@@ -35,13 +35,13 @@
       <div class="all-categories-dialog">
         <el-button 
           v-for="category in categories" 
-          :key="category"
+          :key="category.typeid"
           @click="handleCategorySelect(category)"
-          :type="selectedCategory === category ? 'primary' : 'default'"
+          :type="selectedTypeid === category.typeid ? 'primary' : 'default'"
           round
           class="category-btn"
         >
-          {{ category }}
+          {{ category.name }}
         </el-button>
       </div>
     </el-dialog>
@@ -152,7 +152,7 @@ import { currentUser } from '../composables/useAuth.js'
 const router = useRouter()
 
 const keyword = ref('')
-const selectedCategory = ref('全部')
+const selectedTypeid = ref(0)
 const categories = ref([])
 const journals = ref([])
 const pageNum = ref(1)
@@ -171,7 +171,8 @@ const displayedCategories = computed(() => {
 const fetchCategories = async () => {
   try {
     const { data } = await getCategories()
-    categories.value = data.data
+    const allCategory = { typeid: 0, name: '全部' }
+    categories.value = [allCategory, ...(data.data || [])]
   } catch (error) {
     console.error('获取分类失败:', error)
   }
@@ -179,12 +180,15 @@ const fetchCategories = async () => {
 
 const fetchJournals = async () => {
   try {
-    const { data } = await getJournals({
+    const params = {
       keyword: keyword.value,
-      category: selectedCategory.value,
       page: pageNum.value,
       size: itemsPerPage.value
-    })
+    }
+    if (selectedTypeid.value > 0) {
+      params.typeid = selectedTypeid.value
+    }
+    const { data } = await getJournals(params)
     const pageData = data.data
     journals.value = pageData.records
     total.value = pageData.total
@@ -218,7 +222,7 @@ const search = () => {
 }
 
 const selectCategory = (category) => {
-  selectedCategory.value = category
+  selectedTypeid.value = category.typeid
   pageNum.value = 1
   fetchJournals()
 }
