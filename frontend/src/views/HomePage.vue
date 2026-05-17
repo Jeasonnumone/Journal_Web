@@ -34,7 +34,7 @@
     >
       <div class="all-categories-dialog">
         <el-button 
-          v-for="category in categories" 
+          v-for="category in allFilteredCategories" 
           :key="category.typeid"
           @click="handleCategorySelect(category)"
           :type="selectedTypeid === category.typeid ? 'primary' : 'default'"
@@ -156,16 +156,21 @@ const selectedTypeid = ref(0)
 const categories = ref([])
 const journals = ref([])
 const pageNum = ref(1)
-const itemsPerPage = ref(6)
+const itemsPerPage = ref(10)
 const total = ref(0)
 const totalPages = ref(0)
 const recentComments = ref([])
 const recentPosts = ref([])
 const showAllCategoriesDialog = ref(false)
-const maxVisibleCategories = 8
+const maxVisibleCategories = 9
 
 const displayedCategories = computed(() => {
-  return categories.value.slice(0, maxVisibleCategories)
+  const filtered = categories.value.filter(c => c.parentId !== null)
+  return filtered.slice(0, maxVisibleCategories)
+})
+
+const allFilteredCategories = computed(() => {
+  return categories.value.filter(c => c.parentId !== null)
 })
 
 const fetchCategories = async () => {
