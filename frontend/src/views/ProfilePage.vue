@@ -3,7 +3,14 @@
     <div class="profile-container">
       <div class="profile-sidebar">
         <div class="sidebar-header">
-          <el-avatar :size="64" :icon="UserFilled" class="user-avatar" />
+          <div class="avatar-wrapper" @click="triggerUpload">
+            <el-avatar :size="64" :src="userInfo?.avatar" class="user-avatar">
+              <el-icon :size="32"><UserFilled /></el-icon>
+            </el-avatar>
+            <div class="avatar-overlay">
+              <el-icon><Camera /></el-icon>
+            </div>
+          </div>
           <h3 class="username">{{ userInfo?.username || '加载中...' }}</h3>
         </div>
         
@@ -38,13 +45,22 @@
         <ChangePassword v-else-if="activeMenu === 'password'" />
       </div>
     </div>
+
+    <input 
+      ref="fileInput" 
+      type="file" 
+      accept="image/*" 
+      style="display: none" 
+      @change="handleFileChange" 
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { UserFilled, User, Document, ChatDotRound, Lock } from '@element-plus/icons-vue'
-import { getUserProfile } from '../api/index.js'
+import { UserFilled, User, Document, ChatDotRound, Lock, Camera } from '@element-plus/icons-vue'
+import { getUserProfile, uploadAvatar } from '../api/index.js'
+import { ElMessage } from 'element-plus'
 import UserInfoCard from '../components/profile/UserInfoCard.vue'
 import MyPosts from '../components/profile/MyPosts.vue'
 import MyComments from '../components/profile/MyComments.vue'
@@ -52,9 +68,43 @@ import ChangePassword from '../components/profile/ChangePassword.vue'
 
 const activeMenu = ref('info')
 const userInfo = ref(null)
+const fileInput = ref(null)
+const uploading = ref(false)
 
 const handleMenuSelect = (index) => {
   activeMenu.value = index
+}
+
+const triggerUpload = () => {
+  if (uploading.value) return
+  fileInput.value.click()
+}
+
+const handleFileChange = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('请选择图片文件')
+    return
+  }
+  
+  if (file.size > 2 * 1024 * 1024) {
+    ElMessage.error('图片大小不能超过2MB')
+    return
+  }
+  
+  uploading.value = true
+  try {
+    const { data } = await uploadAvatar(file)
+    userInfo.value.avatar = data.data
+    ElMessage.success('头像上传成功')
+  } catch (error) {
+    console.error('上传头像失败:', error)
+  } finally {
+    uploading.value = false
+    e.target.value = ''
+  }
 }
 
 const fetchUserInfo = async () => {
@@ -102,9 +152,36 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-.user-avatar {
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
   margin-bottom: 1rem;
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.user-avatar {
   background-color: #e8e8e8;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  color: #fff;
+  font-size: 20px;
 }
 
 .username {

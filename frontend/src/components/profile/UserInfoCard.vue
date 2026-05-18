@@ -4,6 +4,14 @@
     
     <div class="info-list" v-if="user">
       <div class="info-item">
+        <span class="info-label">头像</span>
+        <span class="info-value">
+          <el-avatar :size="48" :src="user.avatar">
+            <el-icon :size="24"><UserFilled /></el-icon>
+          </el-avatar>
+        </span>
+      </div>
+      <div class="info-item">
         <span class="info-label">用户名</span>
         <span class="info-value">{{ user.username }}</span>
       </div>
@@ -30,6 +38,8 @@
 </template>
 
 <script setup>
+import { UserFilled } from '@element-plus/icons-vue'
+
 defineProps({
   user: {
     type: Object,

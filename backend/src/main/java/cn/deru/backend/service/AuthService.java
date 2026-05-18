@@ -72,7 +72,7 @@ public class AuthService {
         // 删除已使用的验证码
         redisTemplate.delete(redisKey);
         
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), user.getCreateTime());
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getAvatar(), user.getRole(), user.getCreateTime());
     }
     
     // 登录 - 返回 Access Token 和 Refresh Token
@@ -106,6 +106,7 @@ public class AuthService {
         userInfo.setId(user.getId());
         userInfo.setUsername(user.getUsername());
         userInfo.setEmail(user.getEmail());
+        userInfo.setAvatar(user.getAvatar());
         userInfo.setRole(user.getRole());
         
         response.setUser(userInfo);
@@ -161,7 +162,7 @@ public class AuthService {
     // 获取当前登录用户
     public UserDTO getCurrentUser(String username) {
         User user = userRepository.findByUsername(username);
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), user.getCreateTime());
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getAvatar(), user.getRole(), user.getCreateTime());
     }
     
     // 退出登录 - 删除 Redis 中的 Refresh Token

@@ -157,6 +157,17 @@ export const getRecentPosts = (page = 1, pageSize = 10) => {
   return apiClient.get('/api/posts/recent', { params: { page, pageSize } })
 }
 
+// 上传头像
+export const uploadAvatar = (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return apiClient.post('/api/user/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
 // 获取帖子详情
 export const getPostById = (id) => {
   return apiClient.get(`/api/posts/${id}`)
