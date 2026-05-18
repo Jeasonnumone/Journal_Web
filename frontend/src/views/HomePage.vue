@@ -17,7 +17,7 @@
       </el-button>
       <el-button 
         v-if="categories.length > maxVisibleCategories"
-        @click="showAllCategoriesDialog = true"
+        @click="router.push('/categories')"
         type="info"
         plain
         round
@@ -25,26 +25,6 @@
         更多 ▼
       </el-button>
     </div>
-
-    <el-dialog 
-      v-model="showAllCategoriesDialog" 
-      title="所有期刊分类" 
-      width="600px"
-      :close-on-click-modal="true"
-    >
-      <div class="all-categories-dialog">
-        <el-button 
-          v-for="category in allFilteredCategories" 
-          :key="category.typeid"
-          @click="handleCategorySelect(category)"
-          :type="selectedTypeid === category.typeid ? 'primary' : 'default'"
-          round
-          class="category-btn"
-        >
-          {{ category.name }}
-        </el-button>
-      </div>
-    </el-dialog>
 
     <div class="journal-grid">
       <el-card 
@@ -144,12 +124,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { getCategories, getJournals, getRecentComments, getRecentPosts } from '../api/index.js'
 import { ChatDotRound, UserFilled, Document } from '@element-plus/icons-vue'
 import { currentUser } from '../composables/useAuth.js'
 
 const router = useRouter()
+const route = useRoute()
 
 const keyword = ref('')
 const selectedTypeid = ref(0)
@@ -161,16 +142,11 @@ const total = ref(0)
 const totalPages = ref(0)
 const recentComments = ref([])
 const recentPosts = ref([])
-const showAllCategoriesDialog = ref(false)
 const maxVisibleCategories = 9
 
 const displayedCategories = computed(() => {
   const filtered = categories.value.filter(c => c.parentId !== null)
   return filtered.slice(0, maxVisibleCategories)
-})
-
-const allFilteredCategories = computed(() => {
-  return categories.value.filter(c => c.parentId !== null)
 })
 
 const fetchCategories = async () => {
@@ -232,11 +208,6 @@ const selectCategory = (category) => {
   fetchJournals()
 }
 
-const handleCategorySelect = (category) => {
-  selectCategory(category)
-  showAllCategoriesDialog.value = false
-}
-
 const viewDetail = (id) => {
   router.push(`/journal/${id}`)
 }
@@ -273,6 +244,9 @@ const truncateTitle = (title) => {
 }
 
 onMounted(async () => {
+  if (route.query.typeid) {
+    selectedTypeid.value = parseInt(route.query.typeid)
+  }
   await fetchCategories()
   await fetchJournals()
   await fetchRecentComments()
@@ -524,16 +498,5 @@ onMounted(async () => {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
-}
-
-.all-categories-dialog {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 1rem 0;
-}
-
-.category-btn {
-  margin: 0;
 }
 </style>
