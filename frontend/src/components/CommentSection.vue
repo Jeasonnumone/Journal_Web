@@ -35,7 +35,9 @@
           <el-card shadow="hover" class="comment-card">
 
             <div class="comment-header">
-              <el-avatar :size="36" :icon="UserFilled" class="avatar" />
+              <!-- <el-avatar :size="36" :icon="UserFilled" class="avatar" /> -->
+              <!-- <el-avatar :size="36" :src="currentUser.avatar" class="avatar" /> -->
+              <el-avatar :size="36" :src="comment.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="avatar" />
               <div class="user-info">
                 <span class="username">{{ comment.username || '匿名用户' }}</span>
                 <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
