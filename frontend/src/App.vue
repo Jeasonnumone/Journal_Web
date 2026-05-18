@@ -5,6 +5,7 @@
         <h1 class="logo" @click="router.push('/')" style="cursor: pointer">📚 德儒教育期刊系统</h1>
         <div class="user-info">
           <template v-if="currentUser">
+            <el-avatar :size="32" :src="currentUser.avatar" class="header-avatar" />
             <span class="welcome">欢迎，{{ currentUser.username }}</span>
             <el-button type="warning" plain size="small" @click="router.push('/profile')">个人中心</el-button>
             <el-button type="primary" plain size="small" @click="handleLogout">退出登录</el-button>
@@ -78,5 +79,10 @@ onMounted(async () => {
 
 .welcome {
   margin-right: 1rem;
+}
+
+.header-avatar {
+  cursor: pointer;
+  background-color: #e8e8e8;
 }
 </style>
