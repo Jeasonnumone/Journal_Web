@@ -203,4 +203,24 @@ export const getUserComments = (page = 1, pageSize = 10) => {
   return apiClient.get('/api/comments/user', { params: { page, pageSize } })
 }
 
+// 创建/获取聊天会话
+export const createChatConversation = () => {
+  return apiClient.post('/api/chat/conversation')
+}
+
+// 获取聊天消息
+export const getChatMessages = (conversationId) => {
+  return apiClient.get(`/api/chat/messages/${conversationId}`)
+}
+
+// 获取用户会话列表
+export const getChatConversations = () => {
+  return apiClient.get('/api/chat/conversations')
+}
+
+// 获取管理员会话列表
+export const getAdminConversations = () => {
+  return apiClient.get('/api/chat/admin/conversations')
+}
+
 export default apiClient

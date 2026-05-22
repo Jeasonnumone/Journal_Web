@@ -21,6 +21,8 @@
     <router-view />
     
     <Footer />
+
+    <ChatBox />
   </div>
 </template>
 
@@ -29,6 +31,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { currentUser, initUser, logout, refreshTokens } from './composables/useAuth.js'
 import Footer from './components/Footer.vue'
+import ChatBox from './components/ChatBox.vue'
 
 const router = useRouter()
 

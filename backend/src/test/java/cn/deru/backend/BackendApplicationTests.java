@@ -2,46 +2,49 @@ package cn.deru.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
 
 //@SpringBootTest
 class BackendApplicationTests {
 
-    public String decodeString(String s) {
+    class Solution {
+        public int longestConsecutive(int[] nums) { //遍历从最小的遍历
 
-        char[] chs = s.toCharArray();
-        Stack<Character> stack = new Stack<>();
-        StringBuilder res = new StringBuilder();
-        for(int i=0;i<chs.length;i++){
-            if(chs[i] == ']'){
-                StringBuilder str = new StringBuilder();
-                while(stack.peek()!='['){
-                    str.append(stack.pop());
-                }
-                stack.pop(); //去除[
-                str.reverse();
+            Set<Integer> set = new HashSet<>();
 
-                String code = new String("");
-                int num = stack.pop();
-                for(int j=0;j<num;j++){
-                    code += str.toString();
-                }
-
-                res.append(code);
-                continue;
+            for(int num:nums){
+                set.add(num);
             }
-            stack.push(chs[i]);
-        }
 
-        return res.toString();
+            int res = 0;
+            for(int num:set){
+
+                if(!set.contains(num-1)){
+                    int cur = num;
+                    int len = 0;
+                    while(set.contains(cur)){
+                        len++;
+                        cur++;
+                    }
+                    res = Math.max(res, len);
+                }
+
+            }
+            return res;
+        }
     }
+
+
+
 
     @Test
     void contextLoads() {
 
-        decodeString("3[a]2[bc]");
 
+        String encoded = new BCryptPasswordEncoder().encode("123456");
+        System.out.println(encoded);
 
     }
 
