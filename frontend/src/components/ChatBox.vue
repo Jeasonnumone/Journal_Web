@@ -44,6 +44,7 @@
       <div class="back-bar" @click="backToList">
         <el-icon><ArrowLeft /></el-icon>
         <span>返回会话列表</span>
+        <span class="peer-name">{{ getPeerName(selectedConversation) }}</span>
       </div>
 
       <div class="chat-messages" ref="messagesRef">
@@ -55,7 +56,6 @@
         >
           <el-avatar :size="28" :src="msg.senderAvatar" :icon="UserFilled" class="msg-avatar" />
           <div class="msg-body">
-            <span class="msg-name">{{ msg.senderName }}</span>
             <div class="msg-content">{{ msg.content }}</div>
             <span class="msg-time">{{ formatTime(msg.createdAt) }}</span>
           </div>
@@ -388,6 +388,14 @@ onBeforeUnmount(() => {
   background: #eef;
 }
 
+.back-bar .peer-name {
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+  margin-right: 3.5rem;
+}
+
 .conversation-list {
   flex: 1;
   display: flex;
@@ -492,10 +500,6 @@ onBeforeUnmount(() => {
   color: white;
 }
 
-.message-self .msg-name {
-  display: none;
-}
-
 .msg-avatar {
   flex-shrink: 0;
   background-color: #e8e8e8;
@@ -506,11 +510,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 0.2rem;
   max-width: 70%;
-}
-
-.msg-name {
-  font-size: 0.75rem;
-  color: #999;
 }
 
 .msg-content {
