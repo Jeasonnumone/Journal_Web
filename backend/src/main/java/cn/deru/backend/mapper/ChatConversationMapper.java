@@ -13,15 +13,22 @@ import java.util.List;
 @Mapper
 public interface ChatConversationMapper extends BaseMapper<ChatConversation> {
 
-    @Select("SELECT c.*, u.username, u.avatar as userAvatar " +
+    @Select("SELECT c.*, " +
+            "u.username, u.avatar as userAvatar, " +
+            "a.username as adminName, a.avatar as adminAvatar " +
             "FROM chat_conversation c " +
             "LEFT JOIN user u ON c.user_id = u.id " +
+            "LEFT JOIN user a ON c.admin_id = a.id " +
+            "WHERE c.admin_id = #{adminId} " +
             "ORDER BY c.last_time DESC")
-    List<ChatConversationDTO> selectConversationList();
+    List<ChatConversationDTO> selectConversationByAdminId(@Param("adminId") Long adminId);
 
-    @Select("SELECT c.*, u.username, u.avatar as userAvatar " +
+    @Select("SELECT c.*, " +
+            "u.username, u.avatar as userAvatar, " +
+            "a.username as adminName, a.avatar as adminAvatar " +
             "FROM chat_conversation c " +
             "LEFT JOIN user u ON c.user_id = u.id " +
+            "LEFT JOIN user a ON c.admin_id = a.id " +
             "WHERE c.user_id = #{userId} " +
             "ORDER BY c.last_time DESC")
     List<ChatConversationDTO> selectConversationByUserId(@Param("userId") Long userId);

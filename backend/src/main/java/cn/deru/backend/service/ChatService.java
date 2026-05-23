@@ -74,8 +74,8 @@ public class ChatService {
         return conversationMapper.selectConversationByUserId(userId);
     }
 
-    public List<ChatConversationDTO> getAllConversations() {
-        return conversationMapper.selectConversationList();
+    public List<ChatConversationDTO> getAdminConversations(Long adminId) {
+        return conversationMapper.selectConversationByAdminId(adminId);
     }
 
     private User findAdmin() {

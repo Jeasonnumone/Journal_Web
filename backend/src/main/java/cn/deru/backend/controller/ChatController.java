@@ -2,6 +2,8 @@ package cn.deru.backend.controller;
 
 import cn.deru.backend.dto.ChatConversationDTO;
 import cn.deru.backend.dto.ChatMessageDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.model.ChatConversation;
 import cn.deru.backend.model.Result;
 import cn.deru.backend.service.ChatService;
@@ -41,7 +43,12 @@ public class ChatController {
 
     @GetMapping("/admin/conversations")
     public Result<List<ChatConversationDTO>> getAdminConversations() {
-        List<ChatConversationDTO> conversations = chatService.getAllConversations();
+        String role = UserContext.getRole();
+        if (role == null || !role.equalsIgnoreCase("admin")) {
+            throw new BusinessException(BusinessCode.FORBIDDEN, "无权访问");
+        }
+        Long adminId = UserContext.getUserId();
+        List<ChatConversationDTO> conversations = chatService.getAdminConversations(adminId);
         return Result.success(conversations);
     }
 }

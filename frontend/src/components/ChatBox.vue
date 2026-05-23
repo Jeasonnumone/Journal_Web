@@ -1,55 +1,96 @@
 <template>
   <div class="chat-box" v-if="visible">
     <div class="chat-header">
-      <span class="chat-title">在线咨询</span>
+      <span class="chat-title">{{ isAdmin ? '客服中心' : '在线咨询' }}</span>
       <el-button :icon="Close" size="small" circle @click="close" />
     </div>
 
-    <div class="chat-messages" ref="messagesRef">
-      <div
-        v-for="msg in messages"
-        :key="msg.id"
-        class="message-item"
-        :class="{ 'message-self': msg.senderId === currentUserId }"
-      >
-        <el-avatar :size="28" :src="msg.senderAvatar" :icon="UserFilled" class="msg-avatar" />
-        <div class="msg-body">
-          <span class="msg-name">{{ msg.senderName }}</span>
-          <div class="msg-content">{{ msg.content }}</div>
-          <span class="msg-time">{{ formatTime(msg.createdAt) }}</span>
+    <!-- 会话列表 -->
+    <div v-if="!selectedConversation" class="conversation-list">
+      <div class="list-header">
+        <span>{{ isAdmin ? '用户会话列表' : '我的咨询' }}</span>
+        <el-button size="small" text @click="refreshConversations">
+          <el-icon><Refresh /></el-icon>
+        </el-button>
+      </div>
+      <div class="list-content">
+        <div
+          v-for="conv in conversations"
+          :key="conv.id"
+          class="conversation-item"
+          @click="selectConversation(conv)"
+        >
+          <el-avatar :size="40" :src="getPeerAvatar(conv)" :icon="UserFilled" />
+          <div class="conv-info">
+            <div class="conv-name">{{ getPeerName(conv) }}</div>
+            <div class="conv-last">{{ conv.lastMessage || '暂无消息' }}</div>
+          </div>
+          <div class="conv-meta">
+            <div class="conv-time">{{ formatTime(conv.lastTime) }}</div>
+            <el-badge v-if="getUnreadCount(conv) > 0" :value="getUnreadCount(conv)" />
+          </div>
+        </div>
+        <div v-if="conversations.length === 0" class="empty-list">
+          {{ isAdmin ? '暂无用户咨询' : '暂无咨询记录，点击下方发起咨询' }}
+        </div>
+        <div v-if="!isAdmin && conversations.length === 0" class="start-chat">
+          <el-button type="primary" @click="startNewConversation">发起咨询</el-button>
         </div>
       </div>
-      <div v-if="messages.length === 0" class="empty-chat">暂无消息，发送第一条消息吧</div>
     </div>
 
-    <div class="chat-input">
-      <el-input
-        v-model="inputText"
-        placeholder="输入消息..."
-        @keyup.enter="sendMessage"
-        :disabled="!wsConnected"
-        size="default"
-      />
-      <el-button type="primary" @click="sendMessage" :disabled="!inputText.trim() || !wsConnected">
-        发送
-      </el-button>
-    </div>
+    <!-- 消息界面 -->
+    <template v-else>
+      <div class="back-bar" @click="backToList">
+        <el-icon><ArrowLeft /></el-icon>
+        <span>返回会话列表</span>
+      </div>
+
+      <div class="chat-messages" ref="messagesRef">
+        <div
+          v-for="msg in messages"
+          :key="msg.id"
+          class="message-item"
+          :class="{ 'message-self': msg.senderId === currentUserId }"
+        >
+          <el-avatar :size="28" :src="msg.senderAvatar" :icon="UserFilled" class="msg-avatar" />
+          <div class="msg-body">
+            <span class="msg-name">{{ msg.senderName }}</span>
+            <div class="msg-content">{{ msg.content }}</div>
+            <span class="msg-time">{{ formatTime(msg.createdAt) }}</span>
+          </div>
+        </div>
+        <div v-if="messages.length === 0" class="empty-chat">暂无消息</div>
+      </div>
+
+      <div class="chat-input">
+        <el-input
+          v-model="inputText"
+          placeholder="输入消息..."
+          @keyup.enter="sendMessage"
+          :disabled="!wsConnected"
+          size="default"
+        />
+        <el-button type="primary" @click="sendMessage" :disabled="!inputText.trim() || !wsConnected">
+          发送
+        </el-button>
+      </div>
+    </template>
   </div>
 
   <div class="chat-fab" v-if="!visible" @click="open">
     <el-icon :size="24"><ChatDotRound /></el-icon>
-    <span class="fab-text">在线咨询</span>
+    <span class="fab-text">{{ isAdmin ? '客服中心' : '在线咨询' }}</span>
+    <el-badge v-if="totalUnread > 0" :value="totalUnread" class="fab-badge" />
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onBeforeUnmount, watch } from 'vue'
-import { Close, UserFilled, ChatDotRound } from '@element-plus/icons-vue'
-import { createChatConversation, getChatMessages } from '../api/index.js'
+import { ref, nextTick, onBeforeUnmount, watch, computed } from 'vue'
+import { Close, UserFilled, ChatDotRound, Refresh, ArrowLeft } from '@element-plus/icons-vue'
+import { createChatConversation, getChatMessages, getAdminConversations, getChatConversations } from '../api/index.js'
 import { currentUser } from '../composables/useAuth.js'
 import { ElMessage } from 'element-plus'
-
-const props = defineProps({})
 
 const visible = ref(false)
 const messages = ref([])
@@ -57,13 +98,41 @@ const inputText = ref('')
 const conversationId = ref(null)
 const wsConnected = ref(false)
 const messagesRef = ref(null)
+const conversations = ref([])
+const selectedConversation = ref(null)
 let ws = null
 
 const currentUserId = ref(null)
+const isAdmin = computed(() => currentUser.value?.role?.toLowerCase() === 'admin')
 
 watch(() => currentUser.value, (val) => {
   if (val) currentUserId.value = val.id
 }, { immediate: true })
+
+const totalUnread = computed(() => {
+  return conversations.value.reduce((sum, c) => sum + getUnreadCount(c), 0)
+})
+
+const getPeerName = (conv) => {
+  if (isAdmin.value) {
+    return conv.username || '用户' + conv.userId
+  }
+  return conv.adminName || '客服'
+}
+
+const getPeerAvatar = (conv) => {
+  if (isAdmin.value) {
+    return conv.userAvatar
+  }
+  return conv.adminAvatar
+}
+
+const getUnreadCount = (conv) => {
+  if (isAdmin.value) {
+    return conv.unreadAdmin || 0
+  }
+  return conv.unreadUser || 0
+}
 
 const open = async () => {
   if (!currentUser.value) {
@@ -71,12 +140,13 @@ const open = async () => {
     return
   }
   visible.value = true
-  await initConversation()
-  connectWebSocket()
+  await loadConversations()
 }
 
 const close = () => {
   visible.value = false
+  selectedConversation.value = null
+  messages.value = []
   if (ws) {
     ws.close()
     ws = null
@@ -84,16 +154,71 @@ const close = () => {
   wsConnected.value = false
 }
 
-const initConversation = async () => {
+const loadConversations = async () => {
+  try {
+    let data
+    if (isAdmin.value) {
+      const res = await getAdminConversations()
+      data = res.data
+    } else {
+      const res = await getChatConversations()
+      data = res.data
+    }
+    conversations.value = data.data || []
+  } catch (error) {
+    console.error('加载会话列表失败:', error)
+  }
+}
+
+const refreshConversations = () => {
+  loadConversations()
+}
+
+const startNewConversation = async () => {
   try {
     const { data } = await createChatConversation()
-    conversationId.value = data.data.id
+    const newConv = {
+      id: data.data.id,
+      adminId: data.data.adminId,
+      adminName: '客服',
+      lastMessage: '',
+      lastTime: new Date(),
+      unreadUser: 0
+    }
+    conversations.value.unshift(newConv)
+    selectConversation(newConv)
+  } catch (error) {
+    console.error('创建会话失败:', error)
+    ElMessage.error('创建会话失败')
+  }
+}
+
+const selectConversation = async (conv) => {
+  selectedConversation.value = conv
+  conversationId.value = conv.id
+  await loadMessages()
+  connectWebSocket()
+}
+
+const backToList = () => {
+  selectedConversation.value = null
+  messages.value = []
+  if (ws) {
+    ws.close()
+    ws = null
+  }
+  wsConnected.value = false
+  loadConversations()
+}
+
+const loadMessages = async () => {
+  try {
     const { data: msgData } = await getChatMessages(conversationId.value)
     messages.value = msgData.data || []
     await nextTick()
     scrollToBottom()
   } catch (error) {
-    console.error('初始化会话失败:', error)
+    console.error('加载消息失败:', error)
   }
 }
 
@@ -205,6 +330,10 @@ onBeforeUnmount(() => {
   font-weight: 500;
 }
 
+.fab-badge {
+  margin-left: 0.25rem;
+}
+
 .chat-box {
   position: fixed;
   bottom: 2rem;
@@ -242,6 +371,99 @@ onBeforeUnmount(() => {
 
 .chat-header :deep(.el-button:hover) {
   background: rgba(255, 255, 255, 0.3);
+}
+
+.back-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f5f7fa;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.back-bar:hover {
+  background: #eef;
+}
+
+.conversation-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-weight: 500;
+  color: #333;
+}
+
+.list-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.conversation-item:hover {
+  background: #f5f7fa;
+}
+
+.conv-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.conv-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.conv-last {
+  font-size: 0.8rem;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.conv-time {
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+.empty-list {
+  text-align: center;
+  color: #bbb;
+  padding: 2rem 1rem;
+  font-size: 0.9rem;
+}
+
+.start-chat {
+  text-align: center;
+  padding: 1rem;
 }
 
 .chat-messages {

@@ -80,7 +80,7 @@ public class AuthService {
         // 检查用户是否存在
         User user = userRepository.findByUsername(request.getUsername());
         if (user == null) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new RuntimeException("用户不存在");
         }
         
         // 验证密码
