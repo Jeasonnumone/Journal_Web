@@ -8,6 +8,7 @@ import PublishPost from '../views/PublishPost.vue'
 import EditPost from '../views/EditPost.vue'
 import ProfilePage from '../views/ProfilePage.vue'
 import CategoryPage from '../views/CategoryPage.vue'
+import CommentsPage from '../views/CommentsPage.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -18,7 +19,8 @@ const routes = [
   { path: '/posts/:id', component: PostDetail },
   { path: '/posts/:id/edit', component: EditPost, meta: { requiresAuth: true } },
   { path: '/profile', component: ProfilePage, meta: { requiresAuth: true } },
-  { path: '/categories', component: CategoryPage }
+  { path: '/categories', component: CategoryPage },
+  { path: '/comments', component: CommentsPage }
 ]
 
 const router = createRouter({

@@ -43,7 +43,7 @@
     <template v-else>
       <div class="back-bar" @click="backToList">
         <el-icon><ArrowLeft /></el-icon>
-        <span>返回会话列表</span>
+        <!-- <span>返回会话列表</span> -->
         <span class="peer-name">{{ getPeerName(selectedConversation) }}</span>
       </div>
 

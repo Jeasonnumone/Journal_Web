@@ -57,7 +57,7 @@
       <div class="section-header">
         <el-icon><Document /></el-icon>
         <span class="section-title">最新帖子</span>
-        <el-button type="primary" size="small" @click="router.push('/posts/publish')" v-if="currentUser">
+        <el-button type="primary" size="small" round @click="router.push('/posts/publish')" v-if="currentUser">
           发表帖子
         </el-button>
       </div>
@@ -93,6 +93,9 @@
       <div class="section-header">
         <el-icon><ChatDotRound /></el-icon>
         <span class="section-title">最新评论</span>
+        <el-button type="primary" size="small" round @click="router.push('/comments')">
+          查看更多
+        </el-button>
       </div>
       
       <div v-if="recentComments.length === 0" class="empty-comments">

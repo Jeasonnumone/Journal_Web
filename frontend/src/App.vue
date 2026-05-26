@@ -3,6 +3,12 @@
     <header class="header">
       <div class="header-content">
         <h1 class="logo" @click="router.push('/')" style="cursor: pointer">📚 德儒教育期刊系统</h1>
+        <div class="header-actions">
+          <el-button type="primary" round size="big" @click="router.push('/comments')">
+            <!-- <el-icon><ChatDotRound /></el-icon> -->
+            期刊点评
+          </el-button>
+        </div>
         <div class="user-info">
           <template v-if="currentUser">
             <el-avatar :size="32" :src="currentUser.avatar" class="header-avatar" />
@@ -32,6 +38,7 @@ import { useRouter } from 'vue-router'
 import { currentUser, initUser, logout, refreshTokens } from './composables/useAuth.js'
 import Footer from './components/Footer.vue'
 import ChatBox from './components/ChatBox.vue'
+import { ChatDotRound } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -72,6 +79,12 @@ onMounted(async () => {
 .logo {
   margin: 0;
   font-size: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .user-info {
