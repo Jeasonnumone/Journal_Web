@@ -1,13 +1,6 @@
 <template>
   <main class="comments-page">
-    <div class="page-header">
-      <el-button text @click="router.push('/')" class="back-btn">
-        <el-icon><ArrowLeft /></el-icon>
-        返回
-      </el-button>
-      <h1 class="page-title">期刊点评</h1>
-      <span class="placeholder"></span>
-    </div>
+    <PageHeader title="期刊点评" />
 
     <div class="comments-container">
       <div v-if="loading" class="loading">
@@ -47,7 +40,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRecentComments } from '../api/index.js'
 import { currentUser } from '../composables/useAuth.js'
-import { UserFilled, ArrowLeft, Loading } from '@element-plus/icons-vue'
+import { UserFilled, Loading } from '@element-plus/icons-vue'
+import PageHeader from '../components/PageHeader.vue'
 
 const router = useRouter()
 
@@ -95,28 +89,6 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.back-btn {
-  color: #909399;
-}
-
-.placeholder {
-  width: 60px;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #613ce6;
-  text-align: center;
 }
 
 .comments-container {

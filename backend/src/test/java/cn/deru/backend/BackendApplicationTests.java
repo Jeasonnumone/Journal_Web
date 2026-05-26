@@ -16,8 +16,8 @@ class BackendApplicationTests {
 
 
 
-//        String encoded = new BCryptPasswordEncoder().encode("123456");
-//        System.out.println(encoded);
+        String encoded = new BCryptPasswordEncoder().encode("123456");
+        System.out.println(encoded);
 
     }
 

@@ -1,11 +1,6 @@
 <template>
   <main class="category-page">
-    <div class="page-header">
-      <el-button @click="router.back()" type="primary" plain class="back-btn">
-        ← 返回
-      </el-button>
-      <h1 class="page-title">期刊大全</h1>
-    </div>
+    <PageHeader title="期刊大全" />
 
     <div class="category-layout">
       <div class="left-panel">
@@ -66,6 +61,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategories, getJournals } from '../api/index.js'
+import PageHeader from '../components/PageHeader.vue'
 
 const router = useRouter()
 
@@ -146,28 +142,6 @@ onMounted(fetchCategories)
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.back-btn {
-  flex-shrink: 0;
-}
-
-.page-title {
-  margin: 0;
-  color: #333;
-  font-size: 1.5rem;
-  font-weight: 600;
-  background: linear-gradient(90deg, #f5e6d3, #fff);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  flex: 1;
 }
 
 .category-layout {
