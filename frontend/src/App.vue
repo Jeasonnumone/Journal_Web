@@ -3,12 +3,25 @@
     <header class="header">
       <div class="header-content">
         <h1 class="logo" @click="router.push('/')" style="cursor: pointer">📚 德儒教育期刊系统</h1>
+        
         <div class="header-actions">
           <el-button type="primary" round size="big" @click="router.push('/comments')">
-            <!-- <el-icon><ChatDotRound /></el-icon> -->
             期刊点评
           </el-button>
+          <el-button type="success" round size="big" @click="router.push('/categories')">
+            期刊大全
+          </el-button>
+          <el-button 
+            v-if="currentUser" 
+            type="warning" 
+            round 
+            size="big" 
+            @click="router.push('/posts/publish')"
+          >
+            发表帖子
+          </el-button>
         </div>
+
         <div class="user-info">
           <template v-if="currentUser">
             <el-avatar :size="32" :src="currentUser.avatar" class="header-avatar" />
