@@ -4,7 +4,7 @@
       <div class="post-header">
         <h1 class="post-title">{{ post.title }}</h1>
         <div class="post-author">
-          <el-avatar :size="48" :icon="UserFilled" class="author-avatar" />
+          <el-avatar :size="48" :src="post.avatar || null" :icon="UserFilled" class="author-avatar" />
           <div class="author-info">
             <span class="author-name">作者：{{ post.username }}</span>
             <span class="meta-divider">|</span>

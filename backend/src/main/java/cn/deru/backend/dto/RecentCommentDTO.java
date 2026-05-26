@@ -17,6 +17,8 @@ public class RecentCommentDTO {
     
     private String username;
     
+    private String avatar;
+    
     private String content;
     
     private Date createTime;

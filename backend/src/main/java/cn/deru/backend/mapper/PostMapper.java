@@ -17,7 +17,7 @@ public interface PostMapper extends BaseMapper<Post> {
     /**
      * 分页查询最新帖子
      */
-    @Select("SELECT p.*, u.username " +
+    @Select("SELECT p.*, u.username, u.avatar " +
             "FROM posts p " +
             "LEFT JOIN user u ON p.user_id = u.id " +
             "WHERE p.is_deleted = 0 " +
@@ -27,7 +27,7 @@ public interface PostMapper extends BaseMapper<Post> {
     /**
      * 查询帖子详情（关联用户名）
      */
-    @Select("SELECT p.*, u.username " +
+    @Select("SELECT p.*, u.username, u.avatar " +
             "FROM posts p " +
             "LEFT JOIN user u ON p.user_id = u.id " +
             "WHERE p.id = #{id} " +
@@ -49,7 +49,7 @@ public interface PostMapper extends BaseMapper<Post> {
     /**
      * 查询用户的帖子
      */
-    @Select("SELECT p.*, u.username " +
+    @Select("SELECT p.*, u.username, u.avatar " +
             "FROM posts p " +
             "LEFT JOIN user u ON p.user_id = u.id " +
             "WHERE p.user_id = #{userId} " +

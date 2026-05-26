@@ -73,7 +73,7 @@
           class="post-item"
           @click="goToPost(post.id)"
         >
-          <el-avatar :size="36" :src="post.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="post-avatar" />
+          <el-avatar :size="36" :src="post.avatar || null" :icon="UserFilled" class="post-avatar" />
           <div class="post-body">
             <div class="post-header">
               <h3 class="post-title">{{ post.title }}</h3>
@@ -109,7 +109,7 @@
           class="comment-item"
           @click="goToJournal(comment.journalId)"
         >
-          <el-avatar :size="32" :src="comment.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="comment-avatar" />
+          <el-avatar :size="32" :src="comment.avatar || null" :icon="UserFilled" class="comment-avatar" />
           <div class="comment-body">
             <div class="comment-info">
               <span class="comment-user">{{ comment.username || '匿名用户' }}</span>

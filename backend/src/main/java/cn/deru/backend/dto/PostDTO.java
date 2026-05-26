@@ -13,6 +13,8 @@ public class PostDTO {
     
     private String username;
     
+    private String avatar;
+    
     private String title;
     
     private String content;

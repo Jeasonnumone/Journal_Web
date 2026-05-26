@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface CommentMapper extends BaseMapper<Comment> {
     
-    @Select("SELECT c.*, u.username " +
+    @Select("SELECT c.*, u.username, u.avatar as userAvatar " +
             "FROM comments c " +
             "LEFT JOIN user u ON c.user_id = u.id " +
             "WHERE c.journal_id = #{journalId} " +
@@ -22,7 +22,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "ORDER BY c.create_time DESC")
     IPage<CommentDTO> selectRootComments(Page<CommentDTO> page, @Param("journalId") Long journalId);
     
-    @Select("SELECT c.*, u.username, ru.username as replyToUsername " +
+    @Select("SELECT c.*, u.username, u.avatar as userAvatar, ru.username as replyToUsername " +
             "FROM comments c " +
             "LEFT JOIN user u ON c.user_id = u.id " +
             "LEFT JOIN user ru ON c.reply_to_user_id = ru.id " +
@@ -33,7 +33,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
     IPage<CommentDTO> selectReplies(Page<CommentDTO> page, @Param("rootId") Long rootId);
     
     @Select("SELECT c.id, c.journal_id, c.user_id, c.content, c.create_time, " +
-            "u.username, j.title as journal_title " +
+            "u.username, u.avatar, j.title as journal_title " +
             "FROM comments c " +
             "LEFT JOIN user u ON c.user_id = u.id " +
             "LEFT JOIN journals j ON c.journal_id = j.id " +
@@ -44,7 +44,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
     java.util.List<RecentCommentDTO> selectRecentComments(@Param("limit") Integer limit);
     
     @Select("SELECT c.id, c.journal_id, c.user_id, c.content, c.create_time, " +
-            "u.username, j.title as journal_title " +
+            "u.username, u.avatar, j.title as journal_title " +
             "FROM comments c " +
             "LEFT JOIN user u ON c.user_id = u.id " +
             "LEFT JOIN journals j ON c.journal_id = j.id " +

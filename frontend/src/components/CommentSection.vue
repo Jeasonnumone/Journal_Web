@@ -35,9 +35,7 @@
           <el-card shadow="hover" class="comment-card">
 
             <div class="comment-header">
-              <!-- <el-avatar :size="36" :icon="UserFilled" class="avatar" /> -->
-              <!-- <el-avatar :size="36" :src="currentUser.avatar" class="avatar" /> -->
-              <el-avatar :size="36" :src="comment.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="avatar" />
+              <el-avatar :size="36" :src="comment.userAvatar || null" :icon="UserFilled" class="avatar" />
               <div class="user-info">
                 <span class="username">{{ comment.username || '匿名用户' }}</span>
                 <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
@@ -88,7 +86,7 @@
                   <div v-for="reply in repliesMap[comment.id]" :key="reply.id" class="reply-item">
 
                     <div class="reply-header">
-                      <el-avatar :size="28" :icon="UserFilled" class="reply-avatar" />
+                      <el-avatar :size="28" :src="reply.userAvatar || null" :icon="UserFilled" class="reply-avatar" />
                       <div class="reply-user-info">
                         <span class="username">{{ reply.username || '匿名用户' }}</span>
                         <span class="reply-time">{{ formatTime(reply.createTime) }}</span>

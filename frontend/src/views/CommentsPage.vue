@@ -19,7 +19,8 @@
           class="comment-item"
           @click="goToJournal(comment.journalId)"
         >
-          <el-avatar :size="48" :src="comment.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="comment-avatar" />
+          <!-- <el-avatar :size="48" :src="comment.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="comment-avatar" /> -->
+          <el-avatar :size="48" :src="comment.avatar || null" :icon="UserFilled" class="comment-avatar" />
           <div class="comment-body">
             <div class="comment-header">
               <span class="comment-user">{{ comment.username || '匿名用户' }}</span>
@@ -86,7 +87,7 @@ onMounted(() => {
 .comments-page {
   flex: 1;
   padding: 2rem;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
 }
