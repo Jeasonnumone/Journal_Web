@@ -26,7 +26,7 @@
             <div class="conv-last">{{ conv.lastMessage || '暂无消息' }}</div>
           </div>
           <div class="conv-meta">
-            <div class="conv-time">{{ formatTime(conv.lastTime) }}</div>
+            <div class="conv-time">{{ formatChatTime(conv.lastTime) }}</div>
             <el-badge v-if="getUnreadCount(conv) > 0" :value="getUnreadCount(conv)" />
           </div>
         </div>
@@ -57,7 +57,7 @@
           <el-avatar :size="28" :src="msg.senderAvatar" :icon="UserFilled" class="msg-avatar" />
           <div class="msg-body">
             <div class="msg-content">{{ msg.content }}</div>
-            <span class="msg-time">{{ formatTime(msg.createdAt) }}</span>
+            <span class="msg-time">{{ formatChatTime(msg.createdAt) }}</span>
           </div>
         </div>
         <div v-if="messages.length === 0" class="empty-chat">暂无消息</div>
@@ -90,6 +90,7 @@ import { ref, nextTick, onBeforeUnmount, watch, computed } from 'vue'
 import { Close, UserFilled, ChatDotRound, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import { createChatConversation, getChatMessages, getAdminConversations, getChatConversations } from '../api/index.js'
 import { currentUser } from '../composables/useAuth.js'
+import { formatChatTime } from '../utils/format.js'
 import { ElMessage } from 'element-plus'
 
 const visible = ref(false)
@@ -281,17 +282,6 @@ const scrollToBottom = () => {
   if (messagesRef.value) {
     messagesRef.value.scrollTop = messagesRef.value.scrollHeight
   }
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  const now = new Date()
-  const isToday = date.toDateString() === now.toDateString()
-  if (isToday) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  }
-  return date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 onBeforeUnmount(() => {

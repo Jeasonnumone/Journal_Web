@@ -15,7 +15,7 @@
         <div class="post-header" @click="goToPost(post.id)">
           <h4 class="post-title">{{ post.title }}</h4>
           <div class="post-meta">
-            <span>发布于 {{ formatTime(post.createTime) }}</span>
+            <span>发布于 {{ formatDateTime(post.createTime) }}</span>
             <span>浏览量 {{ post.viewCount || 0 }}</span>
           </div>
         </div>
@@ -44,6 +44,7 @@ import { useRouter } from 'vue-router'
 import { getRecentPosts, deletePost } from '../../api/index.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { currentUser } from '../../composables/useAuth.js'
+import { formatDateTime } from '../../utils/format.js'
 
 const router = useRouter()
 const posts = ref([])
@@ -92,12 +93,6 @@ const handleDelete = async (id) => {
       console.error('删除失败:', error)
     }
   }
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  return date.toLocaleString('zh-CN')
 }
 
 onMounted(() => {

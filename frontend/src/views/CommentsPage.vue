@@ -19,7 +19,6 @@
           class="comment-item"
           @click="goToJournal(comment.journalId)"
         >
-          <!-- <el-avatar :size="48" :src="comment.userId === currentUser?.id ? currentUser.avatar : null" :icon="UserFilled" class="comment-avatar" /> -->
           <el-avatar :size="48" :src="comment.avatar || null" :icon="UserFilled" class="comment-avatar" />
           <div class="comment-body">
             <div class="comment-header">
@@ -41,6 +40,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRecentComments } from '../api/index.js'
 import { currentUser } from '../composables/useAuth.js'
+import { formatTime } from '../utils/format.js'
 import { UserFilled, Loading } from '@element-plus/icons-vue'
 import PageHeader from '../components/PageHeader.vue'
 
@@ -62,20 +62,6 @@ const fetchComments = async () => {
 
 const goToJournal = (id) => {
   router.push(`/journal/${id}`)
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  const now = new Date()
-  const diff = now - date
-  
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
-  if (diff < 2592000000) return `${Math.floor(diff / 86400000)} 天前`
-  
-  return date.toLocaleDateString('zh-CN')
 }
 
 onMounted(() => {

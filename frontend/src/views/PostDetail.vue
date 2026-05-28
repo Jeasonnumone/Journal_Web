@@ -8,7 +8,7 @@
           <div class="author-info">
             <span class="author-name">作者：{{ post.username }}</span>
             <span class="meta-divider">|</span>
-            <span>发布日期：{{ formatTime(post.createTime) }}</span>
+            <span>发布日期：{{ formatDateTime(post.createTime) }}</span>
             <span class="meta-divider">|</span>
             <span>浏览量：{{ post.viewCount || 0 }}</span>
           </div>
@@ -38,6 +38,7 @@ import { getPostById, deletePost } from '../api/index.js'
 import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { currentUser } from '../composables/useAuth.js'
+import { formatDateTime } from '../utils/format.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -75,12 +76,6 @@ const handleDelete = async () => {
       console.error('删除失败:', error)
     }
   }
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  return date.toLocaleString('zh-CN')
 }
 
 onMounted(() => {

@@ -61,6 +61,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategories, getJournals } from '../api/index.js'
+import { truncateTitle } from '../utils/format.js'
 import PageHeader from '../components/PageHeader.vue'
 
 const router = useRouter()
@@ -121,15 +122,6 @@ const fetchCategories = async () => {
   } catch (error) {
     console.error('获取分类失败:', error)
   }
-}
-
-const truncateTitle = (title) => {
-  if (!title) return ''
-  const index = title.indexOf('（')
-  if (index > 0) {
-    return title.substring(0, index)
-  }
-  return title
 }
 
 onMounted(fetchCategories)

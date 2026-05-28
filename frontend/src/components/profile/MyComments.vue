@@ -14,7 +14,7 @@
       >
         <div class="comment-header" @click="goToJournal(comment.journalId)">
           <span class="journal-title">评论了：{{ comment.journalTitle || '未知期刊' }}</span>
-          <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
+          <span class="comment-time">{{ formatDateTime(comment.createTime) }}</span>
         </div>
         <div class="comment-content">{{ comment.content }}</div>
         <div class="comment-actions">
@@ -40,6 +40,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserComments, deleteComment } from '../../api/index.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { formatDateTime } from '../../utils/format.js'
 
 const router = useRouter()
 const comments = ref([])
@@ -83,12 +84,6 @@ const handleDelete = async (id) => {
       console.error('删除失败:', error)
     }
   }
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  return date.toLocaleString('zh-CN')
 }
 
 onMounted(() => {

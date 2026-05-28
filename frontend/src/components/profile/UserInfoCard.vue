@@ -29,7 +29,7 @@
       </div>
       <div class="info-item">
         <span class="info-label">注册时间</span>
-        <span class="info-value">{{ formatTime(user.createTime) }}</span>
+        <span class="info-value">{{ formatDateTime(user.createTime) }}</span>
       </div>
     </div>
     
@@ -39,6 +39,7 @@
 
 <script setup>
 import { UserFilled } from '@element-plus/icons-vue'
+import { formatDateTime } from '../../utils/format.js'
 
 defineProps({
   user: {
@@ -46,12 +47,6 @@ defineProps({
     default: null
   }
 })
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  return date.toLocaleString('zh-CN')
-}
 </script>
 
 <style scoped>

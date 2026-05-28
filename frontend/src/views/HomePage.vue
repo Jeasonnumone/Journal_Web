@@ -131,6 +131,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { getCategories, getJournals, getRecentComments, getRecentPosts } from '../api/index.js'
 import { ChatDotRound, UserFilled, Document } from '@element-plus/icons-vue'
 import { currentUser } from '../composables/useAuth.js'
+import { formatTime, truncateTitle } from '../utils/format.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -221,29 +222,6 @@ const goToJournal = (id) => {
 
 const goToPost = (id) => {
   router.push(`/posts/${id}`)
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  const now = new Date()
-  const diff = now - date
-  
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
-  if (diff < 2592000000) return `${Math.floor(diff / 86400000)} 天前`
-  
-  return date.toLocaleDateString('zh-CN')
-}
-
-const truncateTitle = (title) => {
-  if (!title) return ''
-  const index = title.indexOf('（')
-  if (index > 0) {
-    return title.substring(0, index)
-  }
-  return title
 }
 
 onMounted(async () => {
