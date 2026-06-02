@@ -6,8 +6,16 @@
 # Java build
 **/target/
 
+# Node.js
+**/node_modules/
+**/dist/
+
 # logs
 *.log
 
 # OS
 .DS_Store
+
+# Environment
+.env
+.env.local
