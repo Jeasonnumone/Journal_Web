@@ -37,6 +37,9 @@
         <img :src="journal.coverPath || '/default-cover.jpg'" alt="封面" class="journal-cover" />
         <h3 class="journal-title">{{ truncateTitle(journal.title) }}</h3>
         <p class="journal-organizer">{{ journal.organizer || '未知主办单位' }}</p>
+        <div class="journal-label" v-if="journal.label">
+          <el-tag size="small" type="info">{{ journal.label }}</el-tag>
+        </div>
         <div class="journal-tags" v-if="journal.compositeImpactFactor">
           <el-tag size="small" type="success">影响因子：{{ journal.compositeImpactFactor }}</el-tag>
         </div>
@@ -294,6 +297,10 @@ onMounted(async () => {
   color: #666;
   font-size: 0.85rem;
   margin: 0;
+}
+
+.journal-label {
+  margin-top: 0.3rem;
 }
 
 .journal-tags {

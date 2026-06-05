@@ -36,6 +36,7 @@
             <div class="detail-description" v-if="journal.introduction">
               <h3>简介</h3>
               <p>{{ journal.introduction }}</p>
+              <p v-if="journal.label" class="label"><strong>{{ journal.label }}</strong></p>
             </div>
           </div>
         </div>
@@ -168,5 +169,11 @@ onMounted(fetchJournal)
   line-height: 1.8;
   text-align: justify;
   text-indent: 2em;
+  margin-bottom: 1rem;
+}
+
+.detail-description p.label{
+  color: #ff4040;
+  text-indent: 0em;
 }
 </style>

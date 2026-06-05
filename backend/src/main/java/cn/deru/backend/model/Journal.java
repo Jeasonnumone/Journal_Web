@@ -19,6 +19,7 @@ public class Journal {
     private Integer typeid;
     private String coverPath;
     private String title;
+    private String label;
     private String department;
     private String organizer;
     private String editorialOffice;
