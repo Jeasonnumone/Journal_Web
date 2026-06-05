@@ -303,6 +303,12 @@ onMounted(async () => {
   margin-top: 0.3rem;
 }
 
+.journal-label .el-tag{
+  color:#ff4060;
+  background-color: transparent;
+  border: none;
+}
+
 .journal-tags {
   margin-top: 0.5rem;
 }
