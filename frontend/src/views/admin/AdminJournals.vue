@@ -20,8 +20,8 @@
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="jid" label="期刊ID" width="90" />
       <el-table-column prop="title" label="期刊名称" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="label" label="标签" width="120" />
-      <el-table-column prop="organizer" label="主办单位" width="180" show-overflow-tooltip />
+      <el-table-column prop="label" label="标签" width="600" />
+      <el-table-column prop="organizer" label="主办单位" width="300" show-overflow-tooltip />
       <el-table-column prop="compositeImpactFactor" label="影响因子" width="100" />
       <el-table-column label="操作" width="160" fixed="right">
         <template #default="{ row }">
@@ -36,7 +36,7 @@
         v-model:current-page="currentPage"
         :page-size="pageSize"
         :total="total"
-        layout="total, prev, pager, next"
+        layout="prev, pager, next"
         @current-change="fetchJournals"
       />
     </div>

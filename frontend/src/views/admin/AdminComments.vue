@@ -4,7 +4,7 @@
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="username" label="评论者" width="120" />
       <el-table-column prop="content" label="评论内容" min-width="250" show-overflow-tooltip />
-      <el-table-column prop="journalTitle" label="所属期刊" width="180" show-overflow-tooltip />
+      <el-table-column prop="journalTitle" label="所属期刊" width="300" show-overflow-tooltip />
       <el-table-column prop="isDeleted" label="状态" width="90">
         <template #default="{ row }">
           <el-tag :type="row.isDeleted === 1 ? 'danger' : 'success'">
@@ -35,7 +35,7 @@
         v-model:current-page="currentPage"
         :page-size="pageSize"
         :total="total"
-        layout="total, prev, pager, next"
+        layout="prev, pager, next"
         @current-change="fetchComments"
       />
     </div>
