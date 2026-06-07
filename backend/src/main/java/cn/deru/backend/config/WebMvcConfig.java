@@ -1,6 +1,7 @@
 package cn.deru.backend.config;
 
 import cn.deru.backend.interceptor.AuthInterceptor;
+import cn.deru.backend.interceptor.AdminInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -13,8 +14,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private AuthInterceptor authInterceptor;
     
+    @Autowired
+    private AdminInterceptor adminInterceptor;
+    
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        
+        // 认证拦截器
         registry.addInterceptor(authInterceptor)
                 // 拦截所有需要认证的接口
                 .addPathPatterns("/api/**")
@@ -29,6 +35,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                     "/api/comments/journal/**",
                     "/api/posts/recent"
                 );
+
+        // 管理员权限拦截器（需要在认证拦截器之后执行）
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/api/admin/**");
     }
     
     @Override

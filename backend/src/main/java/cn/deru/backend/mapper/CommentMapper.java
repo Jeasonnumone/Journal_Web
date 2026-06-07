@@ -53,4 +53,12 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "AND c.is_deleted = 0 " +
             "ORDER BY c.create_time DESC")
     IPage<RecentCommentDTO> selectUserComments(Page<RecentCommentDTO> page, @Param("userId") Long userId);
+
+    @Select("SELECT c.id, c.journal_id, c.user_id, c.content, c.create_time, c.is_deleted, " +
+            "u.username, u.avatar, j.title as journal_title " +
+            "FROM comments c " +
+            "LEFT JOIN user u ON c.user_id = u.id " +
+            "LEFT JOIN journals j ON c.journal_id = j.id " +
+            "ORDER BY c.create_time DESC")
+    IPage<RecentCommentDTO> selectAllCommentsAdmin(Page<RecentCommentDTO> page);
 }

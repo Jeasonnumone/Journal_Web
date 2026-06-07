@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <header class="header">
+    <template v-if="!isAdminPage">
+      <header class="header">
       <div class="header-content">
         <h1 class="logo" @click="router.push('/')" style="cursor: pointer">📚 德儒教育期刊系统</h1>
         
@@ -26,6 +27,7 @@
           <template v-if="currentUser">
             <el-avatar :size="32" :src="currentUser.avatar" class="header-avatar" />
             <span class="welcome">欢迎，{{ currentUser.username }}</span>
+            <el-button v-if="currentUser.role === 'ADMIN'" type="danger" plain size="small" @click="router.push('/admin')">管理后台</el-button>
             <el-button type="warning" plain size="small" @click="router.push('/profile')">个人中心</el-button>
             <el-button type="primary" plain size="small" @click="handleLogout">退出登录</el-button>
           </template>
@@ -36,24 +38,28 @@
         </div>
       </div>
     </header>
+    </template>
 
     <router-view />
     
-    <Footer />
-
-    <ChatBox />
+    <template v-if="!isAdminPage">
+      <Footer />
+      <ChatBox />
+    </template>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { currentUser, initUser, logout, refreshTokens } from './composables/useAuth.js'
 import Footer from './components/Footer.vue'
 import ChatBox from './components/ChatBox.vue'
-import { ChatDotRound } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
+
+const isAdminPage = computed(() => route.path.startsWith('/admin'))
 
 const handleLogout = async () => {
   await logout()

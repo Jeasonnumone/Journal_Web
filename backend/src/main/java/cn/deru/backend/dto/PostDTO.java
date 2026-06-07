@@ -21,6 +21,8 @@ public class PostDTO {
     
     private Integer viewCount;
     
+    private Integer isDeleted;
+    
     private Date createTime;
     
     private Date updateTime;

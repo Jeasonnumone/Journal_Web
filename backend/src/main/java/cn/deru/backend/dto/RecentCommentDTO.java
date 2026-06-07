@@ -21,5 +21,7 @@ public class RecentCommentDTO {
     
     private String content;
     
+    private Integer isDeleted;
+    
     private Date createTime;
 }
