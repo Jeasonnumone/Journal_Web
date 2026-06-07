@@ -15,19 +15,19 @@
       </el-input>
     </div>
 
-    <el-table :data="users" v-loading="loading" stripe>
-      <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="用户名" width="150" />
-      <el-table-column prop="email" label="邮箱" width="220" />
-      <el-table-column prop="role" label="角色" width="150">
+    <el-table :data="users" v-loading="loading" stripe style="width: 100%">
+      <el-table-column prop="id" label="ID" width="80" align="center" />
+      <el-table-column prop="username" label="用户名" width="150" align="center" />
+      <el-table-column prop="email" label="邮箱" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="role" label="角色" width="120" align="center">
         <template #default="{ row }">
           <el-tag :type="roleTagType(row.role)">{{ roleLabel(row.role) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="注册时间" width="180">
+      <el-table-column prop="createTime" label="注册时间" width="170" align="center">
         <template #default="{ row }">{{ formatDateTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="280">
+      <el-table-column label="操作" width="220" align="center">
         <template #default="{ row }">
           <el-select
             :model-value="row.role"
