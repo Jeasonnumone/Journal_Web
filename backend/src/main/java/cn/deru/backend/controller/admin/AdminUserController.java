@@ -2,9 +2,8 @@ package cn.deru.backend.controller.admin;
 
 import cn.deru.backend.model.Result;
 import cn.deru.backend.model.User;
-import cn.deru.backend.repository.UserRepository;
+import cn.deru.backend.service.admin.AdminUserService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminUserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private AdminUserService adminUserService;
 
     @GetMapping
     public Result<IPage<User>> getUsers(
@@ -22,50 +21,28 @@ public class AdminUserController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String keyword
     ) {
-        Page<User> userPage = new Page<>(page, pageSize);
-        
-        if (keyword != null && !keyword.isEmpty()) {
-            // 按用户名或邮箱搜索
-            Page<User> result = userRepository.selectPage(userPage,
-                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<User>()
-                    .like(User::getUsername, keyword)
-                    .or()
-                    .like(User::getEmail, keyword)
-                    .orderByDesc(User::getCreateTime)
-            );
-            return Result.success(result);
-        }
-        
-        Page<User> result = userRepository.selectPage(userPage,
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<User>()
-                .orderByDesc(User::getCreateTime)
-        );
+        IPage<User> result = adminUserService.getUsers(page, pageSize, keyword);
         return Result.success(result);
     }
 
     @PutMapping("/{id}/role")
     public Result<Void> updateUserRole(@PathVariable Long id, @RequestBody java.util.Map<String, String> body) {
-        User user = userRepository.selectById(id);
-        if (user == null) {
-            return Result.error(4040, "用户不存在");
+        try {
+            String role = body.get("role");
+            adminUserService.updateUserRole(id, role);
+            return Result.success(null);
+        } catch (RuntimeException e) {
+            return Result.error(4000, e.getMessage());
         }
-        String role = body.get("role");
-        if (role == null || (!role.equals("USER") && !role.equals("SUPPORT") && !role.equals("ADMIN"))) {
-            return Result.error(4000, "无效的角色");
-        }
-        user.setRole(role);
-        user.setUpdateTime(java.time.LocalDateTime.now());
-        userRepository.updateById(user);
-        return Result.success(null);
     }
 
     @DeleteMapping("/{id}")
     public Result<Void> deleteUser(@PathVariable Long id) {
-        User user = userRepository.selectById(id);
-        if (user == null) {
-            return Result.error(4040, "用户不存在");
+        try {
+            adminUserService.deleteUser(id);
+            return Result.success(null);
+        } catch (RuntimeException e) {
+            return Result.error(4040, e.getMessage());
         }
-        userRepository.deleteById(id);
-        return Result.success(null);
     }
 }

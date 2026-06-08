@@ -58,11 +58,11 @@ public interface PostMapper extends BaseMapper<Post> {
     com.baomidou.mybatisplus.core.metadata.IPage<PostDTO> selectUserPosts(Page<PostDTO> page, @Param("userId") Long userId);
 
     /**
-     * 管理后台查询所有帖子（包含已删除）
+     * 管理后台查询所有帖子（升序）
      */
     @Select("SELECT p.*, u.username, u.avatar " +
             "FROM posts p " +
             "LEFT JOIN user u ON p.user_id = u.id " +
-            "ORDER BY p.create_time DESC")
-    com.baomidou.mybatisplus.core.metadata.IPage<PostDTO> selectAllPostsAdmin(Page<PostDTO> page);
+            "ORDER BY p.create_time ASC")
+    com.baomidou.mybatisplus.core.metadata.IPage<PostDTO> selectAllPostsAdminAsc(Page<PostDTO> page);
 }

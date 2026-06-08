@@ -2,16 +2,13 @@ package cn.deru.backend.controller.admin;
 
 import cn.deru.backend.model.Journal;
 import cn.deru.backend.model.JournalCategory;
-import cn.deru.backend.model.PageResult;
 import cn.deru.backend.model.Result;
 import cn.deru.backend.repository.JournalCategoryRepository;
-import cn.deru.backend.repository.JournalRepository;
+import cn.deru.backend.service.admin.AdminJournalService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -20,7 +17,7 @@ import java.util.List;
 public class AdminJournalController {
 
     @Autowired
-    private JournalRepository journalRepository;
+    private AdminJournalService adminJournalService;
 
     @Autowired
     private JournalCategoryRepository journalCategoryRepository;
@@ -31,50 +28,38 @@ public class AdminJournalController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String keyword
     ) {
-        Page<Journal> journalPage = new Page<>(page, pageSize);
-        
-        if (keyword != null && !keyword.isEmpty()) {
-            Page<Journal> result = journalRepository.selectPage(journalPage,
-                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Journal>()
-                    .like(Journal::getTitle, keyword)
-                    .orderByDesc(Journal::getCreatedAt)
-            );
-            return Result.success(result);
-        }
-        
-        Page<Journal> result = journalRepository.selectPage(journalPage,
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Journal>()
-                .orderByDesc(Journal::getCreatedAt)
-        );
+        IPage<Journal> result = adminJournalService.getJournals(page, pageSize, keyword);
         return Result.success(result);
     }
 
     @PostMapping
     public Result<Void> createJournal(@RequestBody Journal journal) {
-        journal.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-        journalRepository.insert(journal);
-        return Result.success(null);
+        try {
+            adminJournalService.createJournal(journal);
+            return Result.success(null);
+        } catch (RuntimeException e) {
+            return Result.error(4000, e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
     public Result<Void> updateJournal(@PathVariable Long id, @RequestBody Journal journal) {
-        Journal existing = journalRepository.selectById(id);
-        if (existing == null) {
-            return Result.error(4040, "期刊不存在");
+        try {
+            adminJournalService.updateJournal(id, journal);
+            return Result.success(null);
+        } catch (RuntimeException e) {
+            return Result.error(4040, e.getMessage());
         }
-        journal.setId(id);
-        journalRepository.updateById(journal);
-        return Result.success(null);
     }
 
     @DeleteMapping("/{id}")
     public Result<Void> deleteJournal(@PathVariable Long id) {
-        Journal journal = journalRepository.selectById(id);
-        if (journal == null) {
-            return Result.error(4040, "期刊不存在");
+        try {
+            adminJournalService.deleteJournal(id);
+            return Result.success(null);
+        } catch (RuntimeException e) {
+            return Result.error(4040, e.getMessage());
         }
-        journalRepository.deleteById(id);
-        return Result.success(null);
     }
 
     @GetMapping("/categories")
