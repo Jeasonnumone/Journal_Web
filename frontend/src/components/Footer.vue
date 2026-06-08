@@ -21,7 +21,8 @@
       </div>
        
       <div class="copyright">
-        © 2026 德儒教育 版权所有
+        <!-- © 2026 德儒教育 版权所有 -->
+        <a href="https://beian.miit.gov.cn/" target="_blank">苏ICP备2026035789号</a>
       </div>
     </div>
   </footer>
