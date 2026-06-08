@@ -28,6 +28,8 @@ services:
       - MINIO_BUCKET=${MINIO_BUCKET:-journal}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
       - TZ=Asia/Shanghai
 
     depends_on:
