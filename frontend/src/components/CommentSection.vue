@@ -191,7 +191,7 @@
           </el-row>
 
           <!-- 我的点评 单独一行 -->
-          <el-divider content-position="left">我的点评</el-divider>
+          <el-divider content-position="left"></el-divider>
           <el-row :gutter="24">
             <el-col :span="24">
               <el-input
