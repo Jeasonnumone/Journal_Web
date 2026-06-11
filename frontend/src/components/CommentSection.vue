@@ -7,18 +7,209 @@
     
     <!-- 发表评论表单 -->
     <div class="comment-form">
-      <el-input
-        v-model="newComment"
-        type="textarea"
-        :rows="4"
-        placeholder="写下你的评论..."
-        class="comment-input"
-      ></el-input>
+      <!-- 投稿体验详情 -->
+      <div class="experience-form">
+        <el-form label-width="100px" size="default">
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="审稿时间">
+                <el-select v-model="experience.reviewTime" placeholder="--请选择--">
+                  <el-option label="1周内" value="1周内" />
+                  <el-option label="1个月以内" value="1个月以内" />
+                  <el-option label="1-3月" value="1-3月" />
+                  <el-option label="3-6月" value="3-6月" />
+                  <el-option label="6-12月" value="6-12月" />
+                  <el-option label="1年以上" value="1年以上" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="是否录用">
+                <el-select v-model="experience.isAccepted" placeholder="--请选择--">
+                  <el-option label="已录用" value="已录用" />
+                  <el-option label="已拒稿" value="已拒稿" />
+                  <el-option label="审稿中" value="审稿中" />
+                  <el-option label="待审稿" value="待审稿" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="发表排期">
+                <el-select v-model="experience.publishPeriod" placeholder="--请选择--">
+                  <el-option label="1个月" value="1个月" />
+                  <el-option label="1-3月" value="1-3月" />
+                  <el-option label="3-6月" value="3-6月" />
+                  <el-option label="6-12月" value="6-12月" />
+                  <el-option label="1年以上" value="1年以上" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="是否首发">
+                <el-select v-model="experience.isFirstPublish" placeholder="--请选择--">
+                  <el-option label="是" value="是" />
+                  <el-option label="否" value="否" />
+                  <el-option label="不确定" value="不确定" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="审稿费用">
+                <el-input v-model="experience.reviewFeeStr" placeholder="0">
+                  <template #append>元</template>
+                </el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="版面费">
+                <el-input v-model="experience.pageFeeStr" placeholder="0">
+                  <template #append>元</template>
+                </el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="稿费">
+                <el-input v-model="experience.paymentStr" placeholder="0">
+                  <template #append>元</template>
+                </el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="稿件字数">
+                <el-input v-model="experience.wordCountStr" placeholder="0">
+                  <template #append>字</template>
+                </el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="我的学历">
+                <el-select v-model="experience.education" placeholder="--请选择--">
+                  <el-option label="专科以下" value="专科以下" />
+                  <el-option label="专科" value="专科" />
+                  <el-option label="本科" value="本科" />
+                  <el-option label="硕士" value="硕士" />
+                  <el-option label="博士" value="博士" />
+                  <el-option label="博士后" value="博士后" />
+                  <el-option label="其他" value="其他" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="我的职称">
+                <el-select v-model="experience.title" placeholder="--请选择--">
+                  <el-option label="无职称" value="无职称" />
+                  <el-option label="助教" value="助教" />
+                  <el-option label="讲师" value="讲师" />
+                  <el-option label="副教授" value="副教授" />
+                  <el-option label="教授" value="教授" />
+                  <el-option label="助理研究员" value="助理研究员" />
+                  <el-option label="副研究员" value="副研究员" />
+                  <el-option label="研究员" value="研究员" />
+                  <el-option label="助理工程师" value="助理工程师" />
+                  <el-option label="工程师" value="工程师" />
+                  <el-option label="高级工程师" value="高级工程师" />
+                  <el-option label="正高级工程师" value="正高级工程师" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="有无课题">
+                <el-select v-model="experience.hasProject" placeholder="--请选择--">
+                  <el-option label="无课题" value="无课题" />
+                  <el-option label="研究生专创课题" value="研究生专创课题" />
+                  <el-option label="院级课题" value="院级课题" />
+                  <el-option label="校级课题" value="校级课题" />
+                  <el-option label="市厅级课题" value="市厅级课题" />
+                  <el-option label="省部级课题" value="省部级课题" />
+                  <el-option label="国家级课题" value="国家级课题" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="有无回复">
+                <el-select v-model="experience.hasReply" placeholder="--请选择--">
+                  <el-option label="有详细回复" value="有详细回复" />
+                  <el-option label="有简单回复" value="有简单回复" />
+                  <el-option label="无回复" value="无回复" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="该刊可发">
+                <el-select v-model="experience.publishType" placeholder="--请选择--">
+                  <el-option label="学术论文" value="学术论文" />
+                  <el-option label="综述文章" value="综述文章" />
+                  <el-option label="教学论文" value="教学论文" />
+                  <el-option label="实践报告" value="实践报告" />
+                  <el-option label="其他类型" value="其他类型" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="投稿主题">
+                <el-input v-model="experience.topic" placeholder="简述投稿主题或研究方向" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <!-- 点评配图 单独一行 -->
+          <el-divider content-position="left">点评配图（最多上传三张）</el-divider>
+          <el-row :gutter="24">
+            <el-col :span="24">
+              <div class="image-upload-wrapper">
+                <el-upload
+                  action="#"
+                  list-type="picture-card"
+                  :auto-upload="false"
+                  :limit="5"
+                  :on-change="handleImageChange"
+                  :on-remove="handleImageRemove"
+                  accept="image/*"
+                >
+                  <el-icon><Plus /></el-icon>
+                </el-upload>
+              </div>
+            </el-col>
+          </el-row>
+
+          <!-- 我的点评 单独一行 -->
+          <el-divider content-position="left">我的点评</el-divider>
+          <el-row :gutter="24">
+            <el-col :span="24">
+              <el-input
+                v-model="newComment"
+                type="textarea"
+                :rows="5"
+                placeholder="请分享您的评论吧"
+              ></el-input>
+            </el-col>
+          </el-row>
+        </el-form>
+      </div>
+
       <div class="form-actions">
         <el-button 
           type="primary" 
           @click="submitComment" 
-          :disabled="!newComment.trim() || !currentUser"
+          :disabled="!currentUser"
         >
           {{ currentUser ? '发表评论' : '请先登录' }}
         </el-button>
@@ -141,7 +332,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { UserFilled, ChatDotRound, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import { UserFilled, ChatDotRound, ArrowUp, ArrowDown, Plus } from '@element-plus/icons-vue'
 import { getRootComments, getReplies, createComment, deleteComment as apiDeleteComment } from '../api/index.js'
 import { formatTime } from '../utils/format.js'
 
@@ -170,6 +361,58 @@ const total = ref(0)
 const isReplying = ref(false)
 const replyToComment = ref(null)
 const replyToUser = ref(null)
+
+// 投稿体验表单数据
+const experience = reactive({
+  reviewTime: '',
+  isAccepted: '',
+  publishPeriod: '',
+  isFirstPublish: '',
+  reviewFeeStr: '',
+  pageFeeStr: '',
+  paymentStr: '',
+  wordCountStr: '',
+  education: '',
+  title: '',
+  hasProject: '',
+  hasReply: '',
+  publishType: '',
+  topic: ''
+})
+
+// 点评配图
+const imageList = ref([])
+
+const handleImageChange = (file) => {
+  imageList.value.push(file.raw)
+}
+
+const handleImageRemove = (file) => {
+  const index = imageList.value.findIndex(img => img.uid === file.uid)
+  if (index > -1) {
+    imageList.value.splice(index, 1)
+  }
+}
+
+// 重置表单
+const resetForm = () => {
+  newComment.value = ''
+  experience.reviewTime = ''
+  experience.isAccepted = ''
+  experience.publishPeriod = ''
+  experience.isFirstPublish = ''
+  experience.reviewFeeStr = ''
+  experience.pageFeeStr = ''
+  experience.paymentStr = ''
+  experience.wordCountStr = ''
+  experience.education = ''
+  experience.title = ''
+  experience.hasProject = ''
+  experience.hasReply = ''
+  experience.publishType = ''
+  experience.topic = ''
+  imageList.value = []
+}
 
 const loadComments = async () => {
   try {
@@ -212,10 +455,6 @@ const toggleReplies = async (comment) => {
 }
 
 const submitComment = async () => {
-  if (!newComment.value.trim()) {
-    ElMessage.warning('请输入评论内容')
-    return
-  }
   if (!props.currentUser) {
     ElMessage.warning('请先登录')
     return
@@ -224,7 +463,22 @@ const submitComment = async () => {
   try {
     const commentData = {
       journalId: props.journalId,
-      content: newComment.value.trim()
+      content: newComment.value.trim(),
+      // 投稿体验详情
+      reviewTime: experience.reviewTime,
+      isAccepted: experience.isAccepted,
+      publishPeriod: experience.publishPeriod,
+      isFirstPublish: experience.isFirstPublish,
+      reviewFee: experience.reviewFeeStr ? Number(experience.reviewFeeStr) : null,
+      pageFee: experience.pageFeeStr ? Number(experience.pageFeeStr) : null,
+      payment: experience.paymentStr ? Number(experience.paymentStr) : null,
+      wordCount: experience.wordCountStr ? Number(experience.wordCountStr) : null,
+      education: experience.education,
+      title: experience.title,
+      hasProject: experience.hasProject,
+      hasReply: experience.hasReply,
+      publishType: experience.publishType,
+      topic: experience.topic
     }
 
     if (isReplying.value && replyToComment.value) {
@@ -235,14 +489,31 @@ const submitComment = async () => {
       }
     }
 
-    await createComment(commentData)
+    // 如果有图片，使用 FormData 提交
+    let response
+    if (imageList.value.length > 0) {
+      const formData = new FormData()
+      Object.keys(commentData).forEach(key => {
+        if (commentData[key] !== null && commentData[key] !== '') {
+          formData.append(key, commentData[key])
+        }
+      })
+      imageList.value.forEach(img => {
+        formData.append('images', img)
+      })
+      // TODO: 调用带图片的评论接口
+      // response = await createCommentWithImages(formData)
+      await createComment(commentData)
+    } else {
+      await createComment(commentData)
+    }
     
     // 保存根评论 ID，用于刷新回复
     const rootId = replyToComment.value?.rootId || replyToComment.value?.id
     const wasExpanded = isReplying.value && expandedComments[rootId]
     
     // 重置状态
-    newComment.value = ''
+    resetForm()
     isReplying.value = false
     replyToComment.value = null
     replyToUser.value = null
@@ -274,7 +545,7 @@ const cancelReply = () => {
   isReplying.value = false
   replyToComment.value = null
   replyToUser.value = null
-  newComment.value = ''
+  resetForm()
 }
 
 const deleteCommentHandler = async (commentId) => {
@@ -348,6 +619,41 @@ onMounted(() => {
 
 .comment-form {
   margin-bottom: 2rem;
+}
+
+.experience-form {
+  background: #fafbfc;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #e8ecf0;
+  margin-bottom: 1.5rem;
+}
+
+.experience-form :deep(.el-form-item) {
+  margin-bottom: 18px;
+}
+
+.experience-form :deep(.el-form-item__label) {
+  color: #606266;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.experience-form :deep(.el-select),
+.experience-form :deep(.el-input) {
+  width: 100%;
+}
+
+.experience-form :deep(.el-divider__text) {
+  font-size: 13px;
+  color: #909399;
+  font-weight: 500;
+}
+
+.image-upload-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .comment-input {
@@ -506,4 +812,5 @@ onMounted(() => {
   padding-top: 1.5rem;
   border-top: 1px solid #eee;
 }
+
 </style>

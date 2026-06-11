@@ -3,7 +3,7 @@
     <template v-if="!isAdminPage">
       <header class="header">
       <div class="header-content">
-        <h1 class="logo" @click="router.push('/')" style="cursor: pointer">📚 德儒教育期刊系统</h1>
+        <h1 class="logo" @click="router.push('/')" style="cursor: pointer">📚 期刊摆渡</h1>
         
         <div class="header-actions">
           <el-button type="primary" round size="big" @click="router.push('/comments')">
