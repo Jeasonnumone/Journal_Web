@@ -235,6 +235,26 @@
             
             <div class="comment-content">{{ comment.content }}</div>
             
+            <!-- 投稿体验信息展示 -->
+            <div v-if="hasExperienceData(comment)" class="experience-info">
+              <div class="experience-tags">
+                <el-tag v-if="comment.reviewTime" size="small" type="warning">审稿时间: {{ comment.reviewTime }}</el-tag>
+                <el-tag v-if="comment.isAccepted" size="small" :type="getAcceptedTagType(comment.isAccepted)">是否录用: {{ comment.isAccepted }}</el-tag>
+                <el-tag v-if="comment.publishPeriod" size="small" type="warning">发表排期: {{ comment.publishPeriod }}</el-tag>
+                <el-tag v-if="comment.isFirstPublish" size="small" type="warning">是否首发: {{ comment.isFirstPublish }}</el-tag>
+                <el-tag v-if="comment.reviewFee != null" size="small" type="warning">审稿费用: {{ comment.reviewFee }}元</el-tag>
+                <el-tag v-if="comment.pageFee != null" size="small" type="warning">版面费: {{ comment.pageFee }}元</el-tag>
+                <el-tag v-if="comment.payment != null" size="small" type="warning">稿费: {{ comment.payment }}元</el-tag>
+                <el-tag v-if="comment.wordCount != null" size="small" type="warning">稿件字数: {{ comment.wordCount }}字</el-tag>
+                <el-tag v-if="comment.education" size="small" type="warning">学历: {{ comment.education }}</el-tag>
+                <el-tag v-if="comment.title" size="small" type="warning">职称: {{ comment.title }}</el-tag>
+                <el-tag v-if="comment.hasProject" size="small" type="warning">课题: {{ comment.hasProject }}</el-tag>
+                <el-tag v-if="comment.hasReply" size="small" type="warning">回复: {{ comment.hasReply }}</el-tag>
+                <el-tag v-if="comment.publishType" size="small" type="warning">可发: {{ comment.publishType }}</el-tag>
+                <el-tag v-if="comment.topic" size="small" type="warning">主题: {{ comment.topic }}</el-tag>
+              </div>
+            </div>
+            
             <div class="comment-footer">
               <el-button 
                 v-if="currentUser" 
@@ -412,6 +432,31 @@ const resetForm = () => {
   experience.publishType = ''
   experience.topic = ''
   imageList.value = []
+}
+
+// 检查评论是否有投稿体验数据
+const hasExperienceData = (comment) => {
+  return comment.reviewTime || 
+         comment.isAccepted || 
+         comment.publishPeriod || 
+         comment.isFirstPublish || 
+         comment.reviewFee != null || 
+         comment.pageFee != null || 
+         comment.payment != null || 
+         comment.wordCount != null || 
+         comment.education || 
+         comment.title || 
+         comment.hasProject || 
+         comment.hasReply || 
+         comment.publishType || 
+         comment.topic
+}
+
+// 根据录用状态返回标签类型
+const getAcceptedTagType = (isAccepted) => {
+  if (isAccepted === '已录用') return 'success'
+  if (isAccepted === '已拒稿') return 'danger'
+  return 'warning'
 }
 
 const loadComments = async () => {
@@ -715,6 +760,28 @@ onMounted(() => {
   line-height: 1.6;
   margin-bottom: 1rem;
   font-size: 1rem;
+}
+
+.experience-info {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #667eea;
+  border-right: 3px solid #667eea;
+}
+
+.experience-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.experience-tags .el-tag {
+  font-size: 12px;
+  width: calc((100% - 40px) / 6);
+  text-align: center;
+  justify-content: center;
 }
 
 .comment-footer {
