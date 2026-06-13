@@ -19,7 +19,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "WHERE c.journal_id = #{journalId} " +
             "AND (c.parent_id IS NULL OR c.root_id = c.id) " +
             "AND c.is_deleted = 0 " +
-            "ORDER BY c.create_time DESC")
+            "ORDER BY c.create_time ASC")
     IPage<CommentDTO> selectRootComments(Page<CommentDTO> page, @Param("journalId") Long journalId);
     
     @Select("SELECT c.*, u.username, u.avatar as userAvatar, ru.username as replyToUsername " +
@@ -29,7 +29,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "WHERE c.root_id = #{rootId} " +
             "AND c.id != #{rootId} " +
             "AND c.is_deleted = 0 " +
-            "ORDER BY c.create_time DESC")
+            "ORDER BY c.create_time ASC")
     IPage<CommentDTO> selectReplies(Page<CommentDTO> page, @Param("rootId") Long rootId);
     
     @Select("SELECT c.id, c.journal_id, c.user_id, c.content, c.create_time, " +

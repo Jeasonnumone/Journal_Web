@@ -60,6 +60,22 @@ public class CommentService {
         comment.setCreateTime(new Date());
         comment.setUpdateTime(new Date());
         
+        // 投稿体验字段
+        comment.setReviewTime(request.getReviewTime());
+        comment.setIsAccepted(request.getIsAccepted());
+        comment.setPublishPeriod(request.getPublishPeriod());
+        comment.setIsFirstPublish(request.getIsFirstPublish());
+        comment.setReviewFee(request.getReviewFee());
+        comment.setPageFee(request.getPageFee());
+        comment.setPayment(request.getPayment());
+        comment.setWordCount(request.getWordCount());
+        comment.setEducation(request.getEducation());
+        comment.setTitle(request.getTitle());
+        comment.setHasProject(request.getHasProject());
+        comment.setHasReply(request.getHasReply());
+        comment.setPublishType(request.getPublishType());
+        comment.setTopic(request.getTopic());
+        
         // 判断是一级评论还是回复
         if (request.getParentId() == null) {
             // 一级评论
