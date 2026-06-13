@@ -42,6 +42,9 @@ public class Comment {
     private String publishType;
     private String topic;
     
+    // 评论图片，JSON数组格式存储
+    private String images;
+    
     private Integer isDeleted;
     
     private Integer replyCount;

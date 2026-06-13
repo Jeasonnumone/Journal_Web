@@ -142,6 +142,17 @@ export const createComment = (data) => {
   return apiClient.post('/api/comments', data)
 }
 
+// 上传评论图片
+export const uploadCommentImage = (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return apiClient.post('/api/comments/upload-image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
 // 删除评论
 export const deleteComment = (commentId) => {
   return apiClient.delete(`/api/comments/${commentId}`)

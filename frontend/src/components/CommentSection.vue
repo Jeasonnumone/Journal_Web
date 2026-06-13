@@ -255,6 +255,19 @@
               </div>
             </div>
             
+            <!-- 评论图片展示 -->
+            <div v-if="comment.images && parseImages(comment.images).length > 0" class="comment-images">
+              <el-image 
+                v-for="(imgUrl, index) in parseImages(comment.images)" 
+                :key="index"
+                :src="imgUrl"
+                :preview-src-list="parseImages(comment.images)"
+                :initial-index="index"
+                fit="cover"
+                class="comment-image"
+              />
+            </div>
+            
             <div class="comment-footer">
               <el-button 
                 v-if="currentUser" 
@@ -353,7 +366,7 @@
 import { ref, reactive, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UserFilled, ChatDotRound, ArrowUp, ArrowDown, Plus } from '@element-plus/icons-vue'
-import { getRootComments, getReplies, createComment, deleteComment as apiDeleteComment } from '../api/index.js'
+import { getRootComments, getReplies, createComment, uploadCommentImage, deleteComment as apiDeleteComment } from '../api/index.js'
 import { formatTime } from '../utils/format.js'
 
 const props = defineProps({
@@ -400,17 +413,29 @@ const experience = reactive({
   topic: ''
 })
 
-// 点评配图
-const imageList = ref([])
+// 点评配图 - 存储已上传的图片URL
+const uploadedImageUrls = ref([])
 
-const handleImageChange = (file) => {
-  imageList.value.push(file.raw)
+const handleImageChange = async (file) => {
+  if (!props.currentUser) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  try {
+    const response = await uploadCommentImage(file.raw)
+    const imageUrl = response.data.data
+    // 将URL和file的uid关联，方便删除时对应
+    uploadedImageUrls.value.push({ uid: file.uid, url: imageUrl })
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    ElMessage.error('图片上传失败')
+  }
 }
 
 const handleImageRemove = (file) => {
-  const index = imageList.value.findIndex(img => img.uid === file.uid)
+  const index = uploadedImageUrls.value.findIndex(img => img.uid === file.uid)
   if (index > -1) {
-    imageList.value.splice(index, 1)
+    uploadedImageUrls.value.splice(index, 1)
   }
 }
 
@@ -431,7 +456,7 @@ const resetForm = () => {
   experience.hasReply = ''
   experience.publishType = ''
   experience.topic = ''
-  imageList.value = []
+  uploadedImageUrls.value = []
 }
 
 // 检查评论是否有投稿体验数据
@@ -457,6 +482,16 @@ const getAcceptedTagType = (isAccepted) => {
   if (isAccepted === '已录用') return 'success'
   if (isAccepted === '已拒稿') return 'danger'
   return 'warning'
+}
+
+// 解析图片URL列表
+const parseImages = (imagesStr) => {
+  if (!imagesStr) return []
+  try {
+    return JSON.parse(imagesStr)
+  } catch (e) {
+    return []
+  }
 }
 
 const loadComments = async () => {
@@ -534,24 +569,12 @@ const submitComment = async () => {
       }
     }
 
-    // 如果有图片，使用 FormData 提交
-    let response
-    if (imageList.value.length > 0) {
-      const formData = new FormData()
-      Object.keys(commentData).forEach(key => {
-        if (commentData[key] !== null && commentData[key] !== '') {
-          formData.append(key, commentData[key])
-        }
-      })
-      imageList.value.forEach(img => {
-        formData.append('images', img)
-      })
-      // TODO: 调用带图片的评论接口
-      // response = await createCommentWithImages(formData)
-      await createComment(commentData)
-    } else {
-      await createComment(commentData)
+    // 如果有已上传的图片，将URL列表作为images字段提交
+    if (uploadedImageUrls.value.length > 0) {
+      commentData.images = JSON.stringify(uploadedImageUrls.value.map(img => img.url))
     }
+
+    await createComment(commentData)
     
     // 保存根评论 ID，用于刷新回复
     const rootId = replyToComment.value?.rootId || replyToComment.value?.id
@@ -782,6 +805,20 @@ onMounted(() => {
   width: calc((100% - 40px) / 6);
   text-align: center;
   justify-content: center;
+}
+
+.comment-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.comment-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .comment-footer {

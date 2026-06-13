@@ -43,6 +43,9 @@ public class CommentDTO {
     private String publishType;
     private String topic;
     
+    // 评论图片，JSON数组格式
+    private String images;
+    
     private Integer replyCount;
     
     private Date createTime;

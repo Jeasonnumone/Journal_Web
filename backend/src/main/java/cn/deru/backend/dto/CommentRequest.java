@@ -35,4 +35,7 @@ public class CommentRequest {
     private String hasReply;
     private String publishType;
     private String topic;
+    
+    // 评论图片，JSON数组格式
+    private String images;
 }

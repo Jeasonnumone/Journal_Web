@@ -75,6 +75,7 @@ public class CommentService {
         comment.setHasReply(request.getHasReply());
         comment.setPublishType(request.getPublishType());
         comment.setTopic(request.getTopic());
+        comment.setImages(request.getImages());
         
         // 判断是一级评论还是回复
         if (request.getParentId() == null) {

@@ -4,11 +4,13 @@ import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
 import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.service.CommentService;
+import cn.deru.backend.service.MinioService;
 import cn.deru.backend.model.Result;
 import cn.deru.backend.util.UserContext;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,6 +21,9 @@ public class CommentController {
     
     @Autowired
     private CommentService commentService;
+    
+    @Autowired
+    private MinioService minioService;
     
     /**
      * 分页查询期刊的一级评论（只展示根评论）
@@ -82,10 +87,41 @@ public class CommentController {
         @RequestBody CommentRequest request,
         HttpServletRequest httpRequest
     ) {
-        // 从用户上下文中获取当前登录用户 ID
         Long currentUserId = getUserIdFromRequest(httpRequest);
         commentService.createComment(request, currentUserId);
         return Result.success(null);
+    }
+    
+    /**
+     * 上传评论图片，返回图片URL
+     */
+    @PostMapping("/upload-image")
+    public Result<String> uploadImage(@RequestParam("file") MultipartFile file) {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            return Result.error(4010, "请先登录");
+        }
+        
+        if (file.isEmpty()) {
+            return Result.error(400, "文件不能为空");
+        }
+        
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return Result.error(400, "只支持图片文件");
+        }
+        
+        if (file.getSize() > 5 * 1024 * 1024) {
+            return Result.error(400, "图片大小不能超过5MB");
+        }
+        
+        try {
+            String imageUrl = minioService.uploadFile(file, "comments");
+            return Result.success(imageUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "上传失败：" + e.getMessage());
+        }
     }
     
     /**
