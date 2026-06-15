@@ -4,19 +4,19 @@
       <div class="contact-info">
         <div class="contact-item">
           <el-icon><Phone /></el-icon>
-          <span>138-0000-0000</span>
+          <span>188-5164-2575</span>
         </div>
         <div class="contact-item">
           <el-icon><ChatDotRound /></el-icon>
-          <span>deru_edu</span>
+          <span>Hj339528340</span>
         </div>
         <div class="contact-item">
           <el-icon><Message /></el-icon>
-          <span>contact@deru.com</span>
+          <span>18851642575@163.com</span>
         </div>
         <div class="contact-item">
           <el-icon><Location /></el-icon>
-          <span>某某市某某区某某路123号</span>
+          <span>江苏省南京市浦口区</span>
         </div>
       </div>
        
