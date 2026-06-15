@@ -44,7 +44,7 @@ public class AuthController {
         // 将 Refresh Token 设置到 HttpOnly Cookie
         Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false); // 生产环境设置为 true
+        refreshCookie.setSecure(true); // 生产环境 HTTPS 必须为 true
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge((int) refreshExpiration); // 从配置文件读取
         
@@ -71,7 +71,7 @@ public class AuthController {
         // 更新 Cookie 中的 Refresh Token
         Cookie refreshCookie = new Cookie("refreshToken", refreshResponse.getRefreshToken());
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false); // 生产环境设置为 true
+        refreshCookie.setSecure(true); // 生产环境 HTTPS 必须为 true
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge((int) refreshExpiration); // 从配置文件读取
         
@@ -91,7 +91,7 @@ public class AuthController {
         // 清除 Cookie
         Cookie refreshCookie = new Cookie("refreshToken", null);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false);
+        refreshCookie.setSecure(true); // 生产环境 HTTPS 必须为 true
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0); // 立即过期
         
