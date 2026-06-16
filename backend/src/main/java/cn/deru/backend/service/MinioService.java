@@ -17,8 +17,8 @@ public class MinioService {
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    @Value("${minio.endpoint}")
-    private String endpoint;
+    @Value("${minio.public-endpoint}")
+    private String publicEndpoint;
 
     public MinioService(MinioClient minioClient) {
         this.minioClient = minioClient;
@@ -38,14 +38,14 @@ public class MinioService {
                         .build()
         );
 
-        return endpoint + "/" + bucketName + "/" + fileName;
+        return publicEndpoint + "/" + bucketName + "/" + fileName;
     }
 
     public void deleteFile(String fileUrl) throws Exception {
         if (fileUrl == null || fileUrl.isEmpty()) {
             return;
         }
-        String prefix = endpoint + "/" + bucketName + "/";
+        String prefix = publicEndpoint + "/" + bucketName + "/";
         if (fileUrl.startsWith(prefix)) {
             String objectName = fileUrl.substring(prefix.length());
             minioClient.removeObject(

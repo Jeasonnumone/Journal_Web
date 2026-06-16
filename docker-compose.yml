@@ -26,7 +26,8 @@ services:
       - DB_USER=${DB_USER:-journal}
       - DB_PASSWORD=${DB_PASSWORD:-journal123}
       - JWT_SECRET=${JWT_SECRET:-my-super-secret-key-for-jwt-production}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_INTERNAL_ENDPOINT=${MINIO_INTERNAL_ENDPOINT:-http://minio:9000}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-https://qikanbaidu.cn/minio}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin123}
       - MINIO_BUCKET=${MINIO_BUCKET:-journal}
