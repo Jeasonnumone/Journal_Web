@@ -80,12 +80,12 @@ public class AuthService {
         // 检查用户是否存在
         User user = userRepository.findByUsername(request.getUsername());
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "用户不存在");
         }
         
         // 验证密码
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new BusinessException(BusinessCode.PASSWORD_ERROR, "用户名或密码错误");
         }
         
         // 生成 Access Token 和 Refresh Token
@@ -117,7 +117,7 @@ public class AuthService {
     public RefreshTokenResponse refreshToken(String refreshToken) {
         // 验证 Refresh Token
         if (!jwtUtil.validateRefreshToken(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new BusinessException(BusinessCode.TOKEN_INVALID, "无效的刷新令牌");
         }
         
         // 从 Refresh Token 中获取 userId
@@ -129,19 +129,19 @@ public class AuthService {
         
         // 检查 Redis 中是否存在该 Refresh Token
         if (storedRefreshToken == null) {
-            throw new RuntimeException("Refresh token not found in Redis");
+            throw new BusinessException(BusinessCode.TOKEN_INVALID, "刷新令牌已过期或不存在");
         }
         
         // 验证传入的 Refresh Token 是否与 Redis 中存储的一致
         if (!storedRefreshToken.equals(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new BusinessException(BusinessCode.TOKEN_INVALID, "无效的刷新令牌");
         }
         
         // 检查用户是否存在
 //        User user = userRepository.findById(userId);
         User user = userRepository.selectById(userId);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "用户不存在");
         }
         
         // 生成新的 Access Token 和 Refresh Token

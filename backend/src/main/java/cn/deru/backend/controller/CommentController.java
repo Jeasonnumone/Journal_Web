@@ -4,6 +4,8 @@ import cn.deru.backend.annotation.RateLimit;
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
 import cn.deru.backend.dto.RecentCommentDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.service.CommentService;
 import cn.deru.backend.service.MinioService;
 import cn.deru.backend.model.Result;
@@ -148,7 +150,7 @@ public class CommentController {
         // 注意：需要确保 JWT 拦截器已经设置了 UserContext
         Long userId = cn.deru.backend.util.UserContext.getUserId();
         if (userId == null) {
-            throw new RuntimeException("用户未登录");
+            throw new BusinessException(BusinessCode.UNAUTHORIZED, "用户未登录");
         }
         return userId;
     }

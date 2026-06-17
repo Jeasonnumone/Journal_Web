@@ -1,6 +1,8 @@
 package cn.deru.backend.service.admin;
 
 import cn.deru.backend.dto.PostDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.mapper.PostMapper;
 import cn.deru.backend.model.Post;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -30,7 +32,7 @@ public class AdminPostService {
     public void deletePost(Long id) {
         Post post = postMapper.selectById(id);
         if (post == null || post.getIsDeleted() == 1) {
-            throw new RuntimeException("帖子不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "帖子不存在");
         }
         post.setIsDeleted(1);
         post.setUpdateTime(new Date());

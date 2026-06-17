@@ -2,6 +2,8 @@ package cn.deru.backend.service;
 
 import cn.deru.backend.dto.ChatConversationDTO;
 import cn.deru.backend.dto.ChatMessageDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.mapper.ChatConversationMapper;
 import cn.deru.backend.mapper.ChatMessageMapper;
 import cn.deru.backend.model.ChatConversation;
@@ -39,7 +41,7 @@ public class ChatService {
 
         User admin = findAdmin();
         if (admin == null) {
-            throw new RuntimeException("暂无在线客服");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "暂无在线客服");
         }
 
         conversation = new ChatConversation();

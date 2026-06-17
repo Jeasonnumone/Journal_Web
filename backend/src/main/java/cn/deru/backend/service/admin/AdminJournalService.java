@@ -1,5 +1,7 @@
 package cn.deru.backend.service.admin;
 
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.model.Journal;
 import cn.deru.backend.repository.JournalRepository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -46,7 +48,7 @@ public class AdminJournalService {
     public void updateJournal(Long id, Journal journal) {
         Journal existing = journalRepository.selectById(id);
         if (existing == null) {
-            throw new RuntimeException("期刊不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "期刊不存在");
         }
         journal.setId(id);
         journalRepository.updateById(journal);
@@ -58,7 +60,7 @@ public class AdminJournalService {
     public void deleteJournal(Long id) {
         Journal journal = journalRepository.selectById(id);
         if (journal == null) {
-            throw new RuntimeException("期刊不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "期刊不存在");
         }
         journalRepository.deleteById(id);
     }

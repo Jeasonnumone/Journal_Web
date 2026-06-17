@@ -3,6 +3,8 @@ package cn.deru.backend.service;
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
 import cn.deru.backend.dto.RecentCommentDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.mapper.CommentMapper;
 import cn.deru.backend.model.Comment;
 import cn.deru.backend.model.User;
@@ -48,7 +50,7 @@ public class CommentService {
         // 验证用户是否存在
         User user = userRepository.selectById(currentUserId);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "用户不存在");
         }
         
         Comment comment = new Comment();
@@ -114,13 +116,13 @@ public class CommentService {
     public void deleteComment(Long commentId, Long currentUserId) {
         Comment comment = commentMapper.selectById(commentId);
         if (comment == null) {
-            throw new RuntimeException("评论不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "评论不存在");
         }
         
         // 验证权限：只有评论作者或管理员可以删除
         User user = userRepository.selectById(currentUserId);
         if (!comment.getUserId().equals(currentUserId) && !"ADMIN".equals(user.getRole())) {
-            throw new RuntimeException("无权删除他人评论");
+            throw new BusinessException(BusinessCode.FORBIDDEN, "无权删除他人评论");
         }
         
         // 软删除

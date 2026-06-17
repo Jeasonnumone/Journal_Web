@@ -1,5 +1,7 @@
 package cn.deru.backend.service;
 
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +31,8 @@ public class EmailService {
             mailSender.send(message);
             log.info("验证码邮件已发送至：{}", to);
         } catch (MailException e) {
-            log.error("发送邮箱验证码失败,邮箱：{}",to);
-            throw new RuntimeException(e);
+            log.error("发送邮箱验证码失败,邮箱：{}", to, e);
+            throw new BusinessException(BusinessCode.INTERNAL_ERROR, "邮件发送失败，请稍后重试");
         }
     }
 }

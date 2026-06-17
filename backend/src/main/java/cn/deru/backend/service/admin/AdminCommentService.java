@@ -1,6 +1,8 @@
 package cn.deru.backend.service.admin;
 
 import cn.deru.backend.dto.RecentCommentDTO;
+import cn.deru.backend.exception.BusinessCode;
+import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.mapper.CommentMapper;
 import cn.deru.backend.model.Comment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -30,7 +32,7 @@ public class AdminCommentService {
     public void deleteComment(Long id) {
         Comment comment = commentMapper.selectById(id);
         if (comment == null) {
-            throw new RuntimeException("评论不存在");
+            throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "评论不存在");
         }
         comment.setIsDeleted(1);
         comment.setUpdateTime(new Date());
