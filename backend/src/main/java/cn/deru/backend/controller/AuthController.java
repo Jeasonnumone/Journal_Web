@@ -1,5 +1,6 @@
 package cn.deru.backend.controller;
 
+import cn.deru.backend.annotation.RateLimit;
 import cn.deru.backend.dto.LoginRequest;
 import cn.deru.backend.dto.LoginResponse;
 import cn.deru.backend.dto.RefreshTokenResponse;
@@ -29,15 +30,17 @@ public class AuthController {
         this.authService = authService;
     }
     
-    // 注册
+    // 注册 - 限流：每个 IP 每分钟最多 5 次
     @PostMapping("/register")
+    @RateLimit(key = "register", time = 60, count = 5, limitType = RateLimit.LimitType.IP, message = "注册请求过于频繁，请稍后再试")
     public Result<UserDTO> register(@RequestBody RegisterRequest request) {
         UserDTO user = authService.register(request);
         return Result.success(user);
     }
     
-    // 登录 - 返回 Access Token（Refresh Token 放在 HttpOnly Cookie 中）
+    // 登录 - 限流：每个 IP 每分钟最多 10 次
     @PostMapping("/login")
+    @RateLimit(key = "login", time = 60, count = 10, limitType = RateLimit.LimitType.IP, message = "登录请求过于频繁，请稍后再试")
     public Result<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResponse loginResponse = authService.login(request);
         
@@ -112,8 +115,9 @@ public class AuthController {
         return Result.success(user);
     }
     
-    // 发送注册验证码
+    // 发送注册验证码 - 限流：每个 IP 每分钟最多 3 次（防止刷验证码）
     @PostMapping("/verify-code")
+    @RateLimit(key = "verify-code", time = 60, count = 3, limitType = RateLimit.LimitType.IP, message = "验证码请求过于频繁，请稍后再试")
     public Result<Void> sendVerifyCode(@RequestBody VerifyCodeRequest request) {
         authService.sendVerifyCode(request.getEmail());
         return Result.success(null);

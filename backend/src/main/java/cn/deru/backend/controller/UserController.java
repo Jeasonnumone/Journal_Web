@@ -1,5 +1,6 @@
 package cn.deru.backend.controller;
 
+import cn.deru.backend.annotation.RateLimit;
 import cn.deru.backend.dto.ChangePasswordRequest;
 import cn.deru.backend.dto.UserDTO;
 import cn.deru.backend.exception.BusinessCode;
@@ -56,9 +57,10 @@ public class UserController {
     }
     
     /**
-     * 上传头像
+     * 上传头像 - 限流：每个用户每分钟最多 5 次
      */
     @PostMapping("/avatar")
+    @RateLimit(key = "avatar-upload", time = 60, count = 5, limitType = RateLimit.LimitType.USER, message = "头像上传过于频繁，请稍后再试")
     public Result<String> uploadAvatar(@RequestParam("file") MultipartFile file) {
         Long userId = UserContext.getUserId();
         if (userId == null) {

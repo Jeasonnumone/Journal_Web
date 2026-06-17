@@ -1,5 +1,6 @@
 package cn.deru.backend.controller;
 
+import cn.deru.backend.annotation.RateLimit;
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
 import cn.deru.backend.dto.RecentCommentDTO;
@@ -80,9 +81,10 @@ public class CommentController {
     }
     
     /**
-     * 发表评论/回复评论
+     * 发表评论/回复评论 - 限流：每个用户每分钟最多 10 次
      */
     @PostMapping
+    @RateLimit(key = "comment-create", time = 60, count = 10, limitType = RateLimit.LimitType.USER, message = "评论过于频繁，请稍后再试")
     public Result<Void> createComment(
         @RequestBody CommentRequest request,
         HttpServletRequest httpRequest
@@ -93,9 +95,10 @@ public class CommentController {
     }
     
     /**
-     * 上传评论图片，返回图片URL
+     * 上传评论图片，返回图片URL - 限流：每个用户每分钟最多 20 次
      */
     @PostMapping("/upload-image")
+    @RateLimit(key = "image-upload", time = 60, count = 20, limitType = RateLimit.LimitType.USER, message = "图片上传过于频繁，请稍后再试")
     public Result<String> uploadImage(@RequestParam("file") MultipartFile file) {
         Long userId = UserContext.getUserId();
         if (userId == null) {

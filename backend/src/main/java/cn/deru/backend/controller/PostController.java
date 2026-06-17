@@ -1,5 +1,6 @@
 package cn.deru.backend.controller;
 
+import cn.deru.backend.annotation.RateLimit;
 import cn.deru.backend.dto.PostDTO;
 import cn.deru.backend.dto.PostRequest;
 import cn.deru.backend.model.Result;
@@ -20,9 +21,10 @@ public class PostController {
     private PostService postService;
     
     /**
-     * 发表帖子
+     * 发表帖子 - 限流：每个用户每分钟最多 5 次
      */
     @PostMapping
+    @RateLimit(key = "post-create", time = 60, count = 5, limitType = RateLimit.LimitType.USER, message = "发帖过于频繁，请稍后再试")
     public Result<Void> createPost(@RequestBody PostRequest request) {
         Long userId = UserContext.getUserId();
         if (userId == null) {
