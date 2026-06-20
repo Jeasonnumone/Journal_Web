@@ -271,7 +271,7 @@
             <div class="comment-footer">
               <el-button 
                 v-if="currentUser" 
-                type="info" 
+                type="primary" 
                 size="small" 
                 text 
                 @click="startReply(comment)"
@@ -306,8 +306,8 @@
                 <div v-if="loadingReplies[comment.id]" class="loading">
                   <el-skeleton :rows="2" animated />
                 </div>
-                <div v-else-if="repliesMap[comment.id] && repliesMap[comment.id].length > 0">
-                  <div v-for="reply in repliesMap[comment.id]" :key="reply.id" class="reply-item">
+                <div v-else-if="repliesMap[comment.id] && repliesMap[comment.id].data && repliesMap[comment.id].data.length > 0">
+                  <div v-for="reply in repliesMap[comment.id].data" :key="reply.id" class="reply-item">
 
                     <div class="reply-header">
                       <el-avatar :size="28" :src="reply.userAvatar || null" :icon="UserFilled" class="reply-avatar" />
@@ -340,6 +340,17 @@
                     </div>
                   </div>
 
+                  <!-- 加载更多按钮 -->
+                  <div v-if="repliesMap[comment.id].hasMore" class="load-more-replies">
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      :loading="loadingMoreReplies[comment.id]"
+                      @click="loadMoreReplies(comment)"
+                    >
+                      加载更多回复
+                    </el-button>
+                  </div>
                 </div>
                 <el-empty v-else description="暂无回复" :image-size="60" />
               </div>
@@ -366,7 +377,7 @@
 import { ref, reactive, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UserFilled, ChatDotRound, ArrowUp, ArrowDown, Plus } from '@element-plus/icons-vue'
-import { getRootComments, getReplies, createComment, uploadCommentImage, deleteComment as apiDeleteComment } from '../api/index.js'
+import { getRootComments, getRepliesByCursor, createComment, uploadCommentImage, deleteComment as apiDeleteComment } from '../api/index.js'
 import { formatTime } from '../utils/format.js'
 
 const props = defineProps({
@@ -384,9 +395,12 @@ const emit = defineEmits(['comment-added', 'comment-deleted'])
 
 const newComment = ref('')
 const comments = ref([])
+// 回复列表改为游标分页结构：{ data: [], cursor: null, hasMore: false }
 const repliesMap = reactive({})
 const expandedComments = reactive({})
 const loadingReplies = reactive({})
+// 加载更多回复的状态
+const loadingMoreReplies = reactive({})
 const currentPage = ref(1)
 const totalPages = ref(1)
 const total = ref(0)
@@ -512,14 +526,45 @@ const loadReplies = async (comment) => {
   
   loadingReplies[comment.id] = true
   try {
-    const response = await getReplies(comment.rootId || comment.id, 1, 20)
-    const pageData = response.data.data
-    repliesMap[comment.id] = (pageData.records || []).filter(r => r.id !== comment.id)
+    // 使用游标分页加载回复（首次加载，cursor 为 null）
+    const response = await getRepliesByCursor(comment.rootId || comment.id, null, 20)
+    const cursorData = response.data.data
+    
+    // 存储游标分页数据
+    repliesMap[comment.id] = {
+      data: (cursorData.data || []).filter(r => r.id !== comment.id),
+      cursor: cursorData.nextCursor,
+      hasMore: cursorData.hasMore || false
+    }
   } catch (error) {
     console.error('加载回复失败:', error)
-    repliesMap[comment.id] = []
+    repliesMap[comment.id] = { data: [], cursor: null, hasMore: false }
   } finally {
     loadingReplies[comment.id] = false
+  }
+}
+
+// 加载更多回复（游标分页）
+const loadMoreReplies = async (comment) => {
+  if (loadingMoreReplies[comment.id]) return
+  
+  const replyData = repliesMap[comment.id]
+  if (!replyData || !replyData.cursor) return
+  
+  loadingMoreReplies[comment.id] = true
+  try {
+    const response = await getRepliesByCursor(comment.rootId || comment.id, replyData.cursor, 20)
+    const cursorData = response.data.data
+    
+    // 追加新数据
+    replyData.data = [...replyData.data, ...(cursorData.data || []).filter(r => r.id !== comment.id)]
+    replyData.cursor = cursorData.nextCursor
+    replyData.hasMore = cursorData.hasMore || false
+  } catch (error) {
+    console.error('加载更多回复失败:', error)
+    ElMessage.error('加载更多回复失败')
+  } finally {
+    loadingMoreReplies[comment.id] = false
   }
 }
 
@@ -627,9 +672,10 @@ const deleteCommentHandler = async (commentId) => {
     await apiDeleteComment(commentId)
     await loadComments()
     
+    // 从回复列表中删除（适配新的数据结构）
     for (const key in repliesMap) {
-      if (repliesMap[key]) {
-        repliesMap[key] = repliesMap[key].filter(r => r.id !== commentId)
+      if (repliesMap[key] && repliesMap[key].data) {
+        repliesMap[key].data = repliesMap[key].data.filter(r => r.id !== commentId)
       }
     }
     
@@ -863,6 +909,12 @@ onMounted(() => {
 
 .reply-item:last-child {
   border-bottom: none;
+}
+
+.load-more-replies {
+  padding: 1rem 0;
+  text-align: center;
+  border-top: 1px solid #eee;
 }
 
 .reply-header {

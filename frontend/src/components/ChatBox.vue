@@ -48,8 +48,20 @@
       </div>
 
       <div class="chat-messages" ref="messagesRef">
+        <!-- 加载更多历史消息按钮 -->
+        <div v-if="messages.hasMore" class="load-more-messages">
+          <el-button 
+            type="primary" 
+            size="small" 
+            :loading="loadingMore"
+            @click="loadMoreMessages"
+          >
+            加载更多历史消息
+          </el-button>
+        </div>
+        
         <div
-          v-for="msg in messages"
+          v-for="msg in messages.data"
           :key="msg.id"
           class="message-item"
           :class="{ 'message-self': msg.senderId === currentUserId }"
@@ -60,7 +72,7 @@
             <span class="msg-time">{{ formatChatTime(msg.createdAt) }}</span>
           </div>
         </div>
-        <div v-if="messages.length === 0" class="empty-chat">暂无消息</div>
+        <div v-if="messages.data.length === 0" class="empty-chat">暂无消息</div>
       </div>
 
       <div class="chat-input">
@@ -88,13 +100,15 @@
 <script setup>
 import { ref, nextTick, onBeforeUnmount, watch, computed } from 'vue'
 import { Close, UserFilled, ChatDotRound, Refresh, ArrowLeft } from '@element-plus/icons-vue'
-import { createChatConversation, getChatMessages, getAdminConversations, getChatConversations } from '../api/index.js'
+import { createChatConversation, getChatMessagesByCursor, getAdminConversations, getChatConversations } from '../api/index.js'
 import { currentUser } from '../composables/useAuth.js'
 import { formatChatTime } from '../utils/format.js'
 import { ElMessage } from 'element-plus'
 
 const visible = ref(false)
-const messages = ref([])
+// 消息改为游标分页结构：{ data: [], cursor: null, hasMore: false }
+const messages = ref({ data: [], cursor: null, hasMore: false })
+const loadingMore = ref(false)
 const inputText = ref('')
 const conversationId = ref(null)
 const wsConnected = ref(false)
@@ -147,7 +161,7 @@ const open = async () => {
 const close = () => {
   visible.value = false
   selectedConversation.value = null
-  messages.value = []
+  messages.value = { data: [], cursor: null, hasMore: false }
   if (ws) {
     ws.close()
     ws = null
@@ -203,7 +217,7 @@ const selectConversation = async (conv) => {
 
 const backToList = () => {
   selectedConversation.value = null
-  messages.value = []
+  messages.value = { data: [], cursor: null, hasMore: false }
   if (ws) {
     ws.close()
     ws = null
@@ -214,12 +228,36 @@ const backToList = () => {
 
 const loadMessages = async () => {
   try {
-    const { data: msgData } = await getChatMessages(conversationId.value)
-    messages.value = msgData.data || []
+    // 使用游标分页加载消息（首次加载，cursor 为 null）
+    const { data: msgData } = await getChatMessagesByCursor(conversationId.value, null, 20)
+    messages.value = {
+      data: msgData.data?.data || [],
+      cursor: msgData.data?.nextCursor || null,
+      hasMore: msgData.data?.hasMore || false
+    }
     await nextTick()
     scrollToBottom()
   } catch (error) {
     console.error('加载消息失败:', error)
+  }
+}
+
+// 加载更多历史消息（游标分页）
+const loadMoreMessages = async () => {
+  if (loadingMore.value || !messages.value.cursor) return
+  
+  loadingMore.value = true
+  try {
+    const { data: msgData } = await getChatMessagesByCursor(conversationId.value, messages.value.cursor, 20)
+    // 追加历史消息到头部（历史消息在前面）
+    messages.value.data = [...(msgData.data?.data || []), ...messages.value.data]
+    messages.value.cursor = msgData.data?.nextCursor || null
+    messages.value.hasMore = msgData.data?.hasMore || false
+  } catch (error) {
+    console.error('加载更多消息失败:', error)
+    ElMessage.error('加载更多消息失败')
+  } finally {
+    loadingMore.value = false
   }
 }
 
@@ -243,9 +281,9 @@ const connectWebSocket = () => {
     try {
       const msg = JSON.parse(event.data)
       if (msg.conversationId === conversationId.value) {
-        const exists = messages.value.some(m => m.id === msg.id)
+        const exists = messages.value.data.some(m => m.id === msg.id)
         if (!exists) {
-          messages.value.push(msg)
+          messages.value.data.push(msg)
           nextTick(() => scrollToBottom())
         }
       }
@@ -469,6 +507,12 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   padding: 1rem;
   background: #f5f7fa;
+}
+
+.load-more-messages {
+  text-align: center;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
 }
 
 .message-item {

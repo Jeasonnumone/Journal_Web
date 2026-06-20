@@ -3,6 +3,7 @@ package cn.deru.backend.controller;
 import cn.deru.backend.annotation.RateLimit;
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
+import cn.deru.backend.dto.CursorPageDTO;
 import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.exception.BusinessCode;
 import cn.deru.backend.exception.BusinessException;
@@ -42,7 +43,7 @@ public class CommentController {
     }
     
     /**
-     * 分页查询回复列表
+     * 传统分页查询回复列表（保留兼容）
      */
     @GetMapping("/{rootId}/replies")
     public Result<IPage<CommentDTO>> getReplies(
@@ -51,6 +52,24 @@ public class CommentController {
         @RequestParam(defaultValue = "20") Integer pageSize
     ) {
         IPage<CommentDTO> replies = commentService.getReplies(rootId, page, pageSize);
+        return Result.success(replies);
+    }
+    
+    /**
+     * 游标分页查询回复列表（优化深度分页）
+     * 
+     * @param rootId 根评论 ID
+     * @param cursor 上一页最后一条回复的 ID（首次查询传 null）
+     * @param size 每页数量
+     * @return 游标分页结果
+     */
+    @GetMapping("/{rootId}/replies/cursor")
+    public Result<CursorPageDTO<CommentDTO>> getRepliesByCursor(
+        @PathVariable Long rootId,
+        @RequestParam(required = false) Long cursor,
+        @RequestParam(defaultValue = "20") Integer size
+    ) {
+        CursorPageDTO<CommentDTO> replies = commentService.getRepliesByCursor(rootId, cursor, size);
         return Result.success(replies);
     }
     

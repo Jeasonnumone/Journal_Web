@@ -130,10 +130,17 @@ export const getRootComments = (journalId, page = 1, pageSize = 10) => {
   })
 }
 
-// 获取回复列表
+// 获取回复列表（传统分页，保留兼容）
 export const getReplies = (rootId, page = 1, pageSize = 20) => {
   return apiClient.get(`/api/comments/${rootId}/replies`, {
     params: { page, pageSize }
+  })
+}
+
+// 获取回复列表（游标分页，优化深度分页）
+export const getRepliesByCursor = (rootId, cursor = null, size = 20) => {
+  return apiClient.get(`/api/comments/${rootId}/replies/cursor`, {
+    params: { cursor, size }
   })
 }
 
@@ -219,9 +226,16 @@ export const createChatConversation = () => {
   return apiClient.post('/api/chat/conversation')
 }
 
-// 获取聊天消息
+// 获取聊天消息（全部，保留兼容）
 export const getChatMessages = (conversationId) => {
   return apiClient.get(`/api/chat/messages/${conversationId}`)
+}
+
+// 获取聊天消息（游标分页，优化深度分页）
+export const getChatMessagesByCursor = (conversationId, cursor = null, size = 20) => {
+  return apiClient.get(`/api/chat/messages/${conversationId}/cursor`, {
+    params: { cursor, size }
+  })
 }
 
 // 获取用户会话列表

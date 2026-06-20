@@ -2,6 +2,7 @@ package cn.deru.backend.service;
 
 import cn.deru.backend.dto.CommentDTO;
 import cn.deru.backend.dto.CommentRequest;
+import cn.deru.backend.dto.CursorPageDTO;
 import cn.deru.backend.dto.RecentCommentDTO;
 import cn.deru.backend.exception.BusinessCode;
 import cn.deru.backend.exception.BusinessException;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CommentService {
@@ -35,11 +37,39 @@ public class CommentService {
     }
     
     /**
-     * 分页查询回复列表
+     * 传统分页查询回复列表（保留兼容）
      */
     public IPage<CommentDTO> getReplies(Long rootId, Integer page, Integer pageSize) {
         Page<CommentDTO> commentPage = new Page<>(page, pageSize);
         return commentMapper.selectReplies(commentPage, rootId);
+    }
+    
+    /**
+     * 游标分页查询回复列表（优化深度分页）
+     * 
+     * @param rootId 根评论 ID
+     * @param lastId 上一页最后一条回复的 ID（首次查询传 null）
+     * @param size 每页数量
+     * @return 游标分页结果
+     */
+    public CursorPageDTO<CommentDTO> getRepliesByCursor(Long rootId, Long lastId, Integer size) {
+        // 查询回复列表
+        List<CommentDTO> replies = commentMapper.selectRepliesByCursor(rootId, lastId, size);
+        
+        // 计算下一页游标
+        Long nextCursor = null;
+        boolean hasMore = false;
+        
+        if (!replies.isEmpty()) {
+            // 最后一条回复的 ID 作为下一页游标
+            nextCursor = replies.get(replies.size() - 1).getId();
+            
+            // 查询总数判断是否还有更多
+            int total = commentMapper.countReplies(rootId);
+            hasMore = replies.size() < total;
+        }
+        
+        return CursorPageDTO.of(replies, nextCursor, hasMore);
     }
     
     /**
