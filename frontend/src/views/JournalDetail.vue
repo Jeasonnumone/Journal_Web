@@ -13,7 +13,7 @@
         <div class="detail-content">
           <div class="detail-left">
             <img :src="journal.coverPath || '/default-cover.jpg'" alt="封面" class="detail-cover" />
-            <div class="detail-info">
+            <!-- <div class="detail-info">
               <p v-if="journal.department"><strong>主管部门：</strong>{{ journal.department }}</p>
               <p v-if="journal.organizer"><strong>主办单位：</strong>{{ journal.organizer }}</p>
               <p v-if="journal.editorialOffice"><strong>编辑部：</strong>{{ journal.editorialOffice }}</p>
@@ -30,8 +30,9 @@
               <p v-if="journal.website">
                 <strong>网址：</strong><a :href="journal.website" target="_blank" class="journal-link">{{ journal.website }}</a>
               </p>
-            </div>
+            </div> -->
           </div>
+
           <div class="detail-right">
             <div class="detail-description" v-if="journal.introduction">
               <h3>简介</h3>
@@ -40,6 +41,25 @@
             </div>
           </div>
         </div>
+        <div class="detail-info">
+              <div v-if="journal.department" class="info-item"><strong>主管部门：</strong>{{ journal.department }}</div>
+              <div v-if="journal.organizer" class="info-item"><strong>主办单位：</strong>{{ journal.organizer }}</div>
+              <div v-if="journal.editorialOffice" class="info-item"><strong>编辑部：</strong>{{ journal.editorialOffice }}</div>
+              <div v-if="journal.cnNumber" class="info-item"><strong>CN号：</strong>{{ journal.cnNumber }}</div>
+              <div v-if="journal.issn" class="info-item"><strong>ISSN：</strong>{{ journal.issn }}</div>
+              <div v-if="journal.compositeImpactFactor" class="info-item"><strong>复合影响因子：</strong>{{ journal.compositeImpactFactor }}</div>
+              <div v-if="journal.comprehensiveImpactFactor" class="info-item"><strong>综合影响因子：</strong>{{ journal.comprehensiveImpactFactor }}</div>
+              <div v-if="journal.price" class="info-item"><strong>定价：</strong>{{ journal.price }}</div>
+              <div v-if="journal.postalCodeSubscription" class="info-item"><strong>邮发代码：</strong>{{ journal.postalCodeSubscription }}</div>
+              <div v-if="journal.postalCode" class="info-item"><strong>邮编：</strong>{{ journal.postalCode }}</div>
+              <!-- <div v-if="journal.address" class="info-item address-item"><strong>地址：</strong>{{ journal.address }}</div> -->
+              <div v-if="journal.phone" class="info-item"><strong>电话：</strong>{{ journal.phone }}</div>
+              <div v-if="journal.email" class="info-item"><strong>邮箱：</strong>{{ journal.email }}</div>
+              <div v-if="journal.website" class="info-item">
+                <strong>网址：</strong><a :href="journal.website" target="_blank" class="journal-link">{{ journal.website }}</a>
+              </div>
+              <div v-if="journal.address" class="info-item address-item"><strong>地址：</strong>{{ journal.address }}</div>
+          </div>
       </div>
 
       <CommentSection 
@@ -130,15 +150,27 @@ onMounted(fetchJournal)
 }
 
 .detail-info {
-  font-size: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.info-item {
+  color: #666;
+  line-height: 2.0;
+  padding: 0.4rem 0.6rem;
+  background: #ffffff;
+  border-radius: 6px;
   text-align: left;
 }
 
-.detail-info p {
-  margin: 0.4rem 0;
-  color: #666;
-  line-height: 1.5;
-  text-align: left;
+.info-item strong {
+  color: #333;
+}
+
+.address-item {
+  grid-column: span 2;
 }
 
 .journal-link {
