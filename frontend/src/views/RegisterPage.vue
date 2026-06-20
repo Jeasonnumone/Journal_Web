@@ -2,8 +2,8 @@
   <div class="register-page">
     <div class="register-container">
       <button class="back-home-btn" @click="router.push('/')">← 返回首页</button>
-      <h1 class="register-title">📚 德儒教育</h1>
-      <h2 class="register-subtitle">注册</h2>
+      <h1 class="register-title">📚 期刊摆渡注册</h1>
+      <!-- <h2 class="register-subtitle">注册</h2> -->
       
       <form class="register-form" @submit.prevent="handleRegister">
         <div class="form-group">
@@ -227,6 +227,7 @@ const handleRegister = async () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-top: 20px;
 }
 
 .form-group {
