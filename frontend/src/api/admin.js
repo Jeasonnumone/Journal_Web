@@ -35,6 +35,10 @@ export const deleteJournal = (id) => {
   return apiClient.delete(`/api/admin/journals/${id}`)
 }
 
+export const batchReplaceJournals = (data) => {
+  return apiClient.post('/api/admin/journals/batch-replace', data)
+}
+
 // ==================== 评论管理 ====================
 export const getAdminComments = (params = {}) => {
   return apiClient.get('/api/admin/comments', { params })

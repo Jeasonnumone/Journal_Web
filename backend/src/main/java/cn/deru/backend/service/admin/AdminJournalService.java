@@ -1,5 +1,6 @@
 package cn.deru.backend.service.admin;
 
+import cn.deru.backend.dto.BatchReplaceRequest;
 import cn.deru.backend.exception.BusinessCode;
 import cn.deru.backend.exception.BusinessException;
 import cn.deru.backend.model.Journal;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class AdminJournalService {
@@ -63,5 +66,34 @@ public class AdminJournalService {
             throw new BusinessException(BusinessCode.RESOURCE_NOT_FOUND, "期刊不存在");
         }
         journalRepository.deleteById(id);
+    }
+
+    /**
+     * 批量替换期刊字段内容
+     * 使用 MySQL REPLACE 函数，单条 SQL 完成批量替换
+     */
+    public int batchReplace(BatchReplaceRequest request) {
+        List<Long> ids = request.getIds();
+        String field = request.getField();
+        String searchValue = request.getSearchValue();
+        String replaceValue = request.getReplaceValue();
+
+        if (ids == null || ids.isEmpty()) {
+            throw new BusinessException(BusinessCode.BAD_REQUEST, "请选择要替换的期刊");
+        }
+        if (field == null || field.isEmpty()) {
+            throw new BusinessException(BusinessCode.BAD_REQUEST, "请选择替换字段");
+        }
+        if (searchValue == null || searchValue.isEmpty()) {
+            throw new BusinessException(BusinessCode.BAD_REQUEST, "请输入查找内容");
+        }
+
+        // 允许替换的字段白名单（防止 SQL 注入，因为 field 使用了 ${} 插值）
+        List<String> allowedFields = Arrays.asList("label", "organizer", "department", "introduction");
+        if (!allowedFields.contains(field)) {
+            throw new BusinessException(BusinessCode.BAD_REQUEST, "不允许替换该字段");
+        }
+
+        return journalRepository.batchReplaceField(field, searchValue, replaceValue, ids);
     }
 }

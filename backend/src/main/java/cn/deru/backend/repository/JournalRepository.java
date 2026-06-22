@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -93,4 +94,21 @@ public interface JournalRepository extends BaseMapper<Journal> {
 
     @Select("SELECT DISTINCT typeid FROM journals")
     List<Integer> findAllTypeids();
+
+    /**
+     * 批量替换字段内容（使用 MySQL REPLACE 函数，单条 SQL 完成）
+     * 注意：field 已在 Service 层做白名单校验，防止 SQL 注入
+     */
+    @Update("<script>" +
+            "UPDATE journals SET ${field} = REPLACE(${field}, #{searchValue}, #{replaceValue}) " +
+            "WHERE id IN " +
+            "<foreach item='id' collection='ids' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            " AND ${field} LIKE CONCAT('%', #{searchValue}, '%')" +
+            "</script>")
+    int batchReplaceField(@Param("field") String field,
+                          @Param("searchValue") String searchValue,
+                          @Param("replaceValue") String replaceValue,
+                          @Param("ids") List<Long> ids);
 }

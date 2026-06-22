@@ -1,5 +1,6 @@
 package cn.deru.backend.controller.admin;
 
+import cn.deru.backend.dto.BatchReplaceRequest;
 import cn.deru.backend.model.Journal;
 import cn.deru.backend.model.JournalCategory;
 import cn.deru.backend.model.Result;
@@ -59,6 +60,16 @@ public class AdminJournalController {
             return Result.success(null);
         } catch (RuntimeException e) {
             return Result.error(4040, e.getMessage());
+        }
+    }
+
+    @PostMapping("/batch-replace")
+    public Result<Integer> batchReplace(@RequestBody BatchReplaceRequest request) {
+        try {
+            int count = adminJournalService.batchReplace(request);
+            return Result.success(count);
+        } catch (RuntimeException e) {
+            return Result.error(4000, e.getMessage());
         }
     }
 

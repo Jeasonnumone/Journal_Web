@@ -14,9 +14,22 @@
         </template>
       </el-input>
       <el-button type="primary" @click="showAddDialog">添加期刊</el-button>
+      <el-button
+        type="warning"
+        :disabled="selectedJournals.length === 0"
+        @click="showBatchReplaceDialog"
+      >
+        批量替换 ({{ selectedJournals.length }})
+      </el-button>
     </div>
 
-    <el-table :data="journals" v-loading="loading" stripe>
+    <el-table
+      :data="journals"
+      v-loading="loading"
+      stripe
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="jid" label="期刊ID" width="90" />
       <el-table-column prop="title" label="期刊名称" min-width="200" show-overflow-tooltip />
@@ -86,12 +99,44 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 批量替换对话框 -->
+    <el-dialog v-model="batchReplaceDialogVisible" title="批量替换" width="1000px">
+      <el-form :model="batchReplaceForm" label-width="100px">
+        <el-form-item label="选中期刊">
+          <span>{{ selectedJournals.length }} 条</span>
+        </el-form-item>
+        <el-form-item label="替换字段">
+          <el-select v-model="batchReplaceForm.field" placeholder="请选择字段" style="width: 100%">
+            <el-option label="标签" value="label" />
+            <el-option label="主办单位" value="organizer" />
+            <el-option label="主管部门" value="department" />
+            <el-option label="简介" value="introduction" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="查找内容">
+          <el-input v-model="batchReplaceForm.searchValue" placeholder="要查找的内容" />
+        </el-form-item>
+        <el-form-item label="替换为">
+          <el-input v-model="batchReplaceForm.replaceValue" placeholder="替换后的内容" />
+        </el-form-item>
+        <el-form-item>
+          <el-alert type="info" :closable="false">
+            将在选中的 {{ selectedJournals.length }} 条期刊的「{{ getFieldLabel(batchReplaceForm.field) }}」字段中，将「{{ batchReplaceForm.searchValue || '空' }}」替换为「{{ batchReplaceForm.replaceValue || '空' }}」
+          </el-alert>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchReplaceDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleBatchReplace" :loading="batchReplaceLoading">确定替换</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getAdminJournals, createJournal, updateJournal, deleteJournal } from '../../api/admin.js'
+import { getAdminJournals, createJournal, updateJournal, deleteJournal, batchReplaceJournals } from '../../api/admin.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const journals = ref([])
@@ -105,6 +150,79 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const editId = ref(null)
 const form = ref({})
+
+// 批量替换相关
+const selectedJournals = ref([])
+const batchReplaceDialogVisible = ref(false)
+const batchReplaceLoading = ref(false)
+const batchReplaceForm = ref({
+  field: 'label',
+  searchValue: '',
+  replaceValue: ''
+})
+
+const fieldLabels = {
+  label: '标签',
+  organizer: '主办单位',
+  department: '主管部门',
+  introduction: '简介'
+}
+
+const getFieldLabel = (field) => {
+  return fieldLabels[field] || field
+}
+
+const handleSelectionChange = (selection) => {
+  selectedJournals.value = selection
+}
+
+const showBatchReplaceDialog = () => {
+  batchReplaceForm.value = {
+    field: 'label',
+    searchValue: '',
+    replaceValue: ''
+  }
+  batchReplaceDialogVisible.value = true
+}
+
+const handleBatchReplace = async () => {
+  if (!batchReplaceForm.value.field) {
+    ElMessage.warning('请选择替换字段')
+    return
+  }
+  if (!batchReplaceForm.value.searchValue) {
+    ElMessage.warning('请输入查找内容')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要在 ${selectedJournals.value.length} 条期刊的「${getFieldLabel(batchReplaceForm.value.field)}」字段中，将「${batchReplaceForm.value.searchValue}」替换为「${batchReplaceForm.value.replaceValue}」吗？`,
+      '确认批量替换',
+      { type: 'warning' }
+    )
+
+    batchReplaceLoading.value = true
+    const ids = selectedJournals.value.map(j => j.id)
+    const { data } = await batchReplaceJournals({
+      ids,
+      field: batchReplaceForm.value.field,
+      searchValue: batchReplaceForm.value.searchValue,
+      replaceValue: batchReplaceForm.value.replaceValue
+    })
+    ElMessage.success(`成功替换 ${data.data} 条期刊`)
+    batchReplaceDialogVisible.value = false
+    selectedJournals.value = []
+    fetchJournals()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量替换失败:', error)
+      ElMessage.error('批量替换失败')
+    }
+  } finally {
+    batchReplaceLoading.value = false
+  }
+}
 
 const fetchJournals = async () => {
   loading.value = true
