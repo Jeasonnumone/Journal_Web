@@ -1,0 +1,92 @@
+global:
+  # 告警解决时间
+  resolve_timeout: 5m
+  # SMTP 配置（邮件告警）
+  smtp_smarthost: 'smtp.qq.com:465'
+  smtp_from: '${SMTP_FROM}'
+  smtp_auth_username: '${SMTP_USERNAME}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+# 告警模板
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# 告警路由
+route:
+  # 默认接收器
+  receiver: 'default-receiver'
+  # 告警分组
+  group_by: ['alertname', 'severity']
+  # 等待时间（同组告警合并）
+  group_wait: 30s
+  # 同组新告警等待时间
+  group_interval: 5m
+  # 重复告警发送间隔
+  repeat_interval: 4h
+
+  # 子路由
+  routes:
+    # 关键告警 -> 邮件 + Webhook
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      continue: true
+
+    # 警告告警 -> 邮件
+    - match:
+        severity: warning
+      receiver: 'warning-receiver'
+
+# 告警接收器
+receivers:
+  # 默认接收器
+  - name: 'default-receiver'
+    email_configs:
+      - to: '${ALERT_EMAIL_TO}'
+        send_resolved: true
+        headers:
+          Subject: '[监控告警] {{ .Status | toUpper }}: {{ .CommonLabels.alertname }}'
+
+  # 关键告警接收器
+  - name: 'critical-receiver'
+    email_configs:
+      - to: '${ALERT_EMAIL_TO}'
+        send_resolved: true
+        headers:
+          Subject: '[紧急告警] {{ .Status | toUpper }}: {{ .CommonLabels.alertname }}'
+    # Webhook（可选，可接入企业微信/钉钉等）
+    webhook_configs:
+      - url: '${WEBHOOK_URL}'
+        send_resolved: true
+
+  # 警告告警接收器
+  - name: 'warning-receiver'
+    email_configs:
+      - to: '${ALERT_EMAIL_TO}'
+        send_resolved: true
+        headers:
+          Subject: '[警告告警] {{ .Status | toUpper }}: {{ .CommonLabels.alertname }}'
+
+# 告警抑制规则
+inhibit_rules:
+  # 应用宕机时，抑制该应用的其他告警
+  - source_match:
+      alertname: 'ApplicationDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['application', 'instance']
+
+  # 磁盘即将耗尽时，抑制磁盘使用率过高告警
+  - source_match:
+      alertname: 'DiskCritical'
+    target_match:
+      alertname: 'HighDiskUsage'
+    equal: ['instance', 'mountpoint']
+
+  # JVM 内存即将耗尽时，抑制内存使用率过高告警
+  - source_match:
+      alertname: 'JvmMemoryCritical'
+    target_match:
+      alertname: 'HighJvmMemoryUsage'
+    equal: ['application']

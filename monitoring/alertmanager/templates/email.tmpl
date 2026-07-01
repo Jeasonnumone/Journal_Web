@@ -1,0 +1,55 @@
+{{ define "email.subject" }}
+[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }} - {{ .CommonLabels.application | default "系统" }}
+{{ end }}
+
+{{ define "email.body" }}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .alert { padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .critical { background-color: #ffebee; border-left: 5px solid #f44336; }
+        .warning { background-color: #fff3e0; border-left: 5px solid #ff9800; }
+        .resolved { background-color: #e8f5e9; border-left: 5px solid #4caf50; }
+        .label { font-weight: bold; }
+        .value { color: #666; }
+        .timestamp { color: #999; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h2>{{ template "email.subject" . }}</h2>
+
+    {{ range .Alerts }}
+    <div class="alert {{ .Labels.severity }} {{ if eq .Status "resolved" }}resolved{{ end }}">
+        <p><strong>告警名称:</strong> {{ .Labels.alertname }}</p>
+        <p><strong>告警级别:</strong> {{ .Labels.severity }}</p>
+
+        {{ if .Labels.application }}
+        <p><strong>应用:</strong> {{ .Labels.application }}</p>
+        {{ end }}
+
+        {{ if .Labels.instance }}
+        <p><strong>实例:</strong> {{ .Labels.instance }}</p>
+        {{ end }}
+
+        <p><strong>描述:</strong> {{ .Annotations.description }}</p>
+
+        <p class="timestamp">
+            {{ if eq .Status "firing" }}
+            开始时间: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+            {{ else }}
+            解决时间: {{ .EndsAt.Format "2006-01-02 15:04:05" }}
+            {{ end }}
+        </p>
+    </div>
+    {{ end }}
+
+    <hr>
+    <p style="color: #999; font-size: 12px;">
+        此邮件由 Prometheus AlertManager 自动发送，请勿直接回复。
+    </p>
+</body>
+</html>
+{{ end }}
