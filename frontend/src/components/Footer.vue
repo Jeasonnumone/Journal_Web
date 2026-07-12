@@ -4,7 +4,7 @@
       <div class="contact-info">
         <div class="contact-item">
           <el-icon><Phone /></el-icon>
-          <span>188-5164-2575</span>
+          <span>189-1475-2245</span>
         </div>
         <div class="contact-item">
           <el-icon><ChatDotRound /></el-icon>
@@ -12,7 +12,7 @@
         </div>
         <div class="contact-item">
           <el-icon><Message /></el-icon>
-          <span>18851642575@163.com</span>
+          <span>qikanbaidu@163.com</span>
         </div>
         <div class="contact-item">
           <el-icon><Location /></el-icon>
