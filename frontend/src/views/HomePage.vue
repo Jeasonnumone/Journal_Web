@@ -27,8 +27,8 @@
     </div>
 
     <div class="journal-grid">
-      <el-card 
-        v-for="journal in journals" 
+      <el-card
+        v-for="journal in journals"
         :key="journal.id"
         @click="viewDetail(journal.id)"
         class="journal-card"
@@ -144,7 +144,7 @@ const selectedTypeid = ref(0)
 const categories = ref([])
 const journals = ref([])
 const pageNum = ref(1)
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(5)  // 首页只展示5个期刊
 const total = ref(0)
 const totalPages = ref(0)
 const recentComments = ref([])
@@ -266,8 +266,9 @@ onMounted(async () => {
 
 .journal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .journal-card {
