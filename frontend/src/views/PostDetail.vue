@@ -23,6 +23,13 @@
         <el-button type="primary" @click="goToEdit">编辑</el-button>
         <el-button type="danger" @click="handleDelete">删除</el-button>
       </div>
+
+      <!-- 评论区 -->
+      <PostCommentSection
+        v-if="post"
+        :postId="post.id"
+        :currentUser="currentUser"
+      />
     </div>
 
     <div v-else class="loading">
@@ -39,6 +46,7 @@ import { UserFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { currentUser } from '../composables/useAuth.js'
 import { formatDateTime } from '../utils/format.js'
+import PostCommentSection from '../components/PostCommentSection.vue'
 
 const route = useRoute()
 const router = useRouter()

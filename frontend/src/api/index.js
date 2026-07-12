@@ -248,4 +248,37 @@ export const getAdminConversations = () => {
   return apiClient.get('/api/chat/admin/conversations')
 }
 
+// ==================== 帖子评论 ====================
+
+// 获取帖子根评论
+export const getPostRootComments = (postId, page = 1, pageSize = 10) => {
+  return apiClient.get(`/api/post-comments/post/${postId}`, {
+    params: { page, pageSize }
+  })
+}
+
+// 获取帖子回复列表（传统分页）
+export const getPostReplies = (rootId, page = 1, pageSize = 20) => {
+  return apiClient.get(`/api/post-comments/${rootId}/replies`, {
+    params: { page, pageSize }
+  })
+}
+
+// 获取帖子回复列表（游标分页）
+export const getPostRepliesByCursor = (rootId, cursor = null, size = 20) => {
+  return apiClient.get(`/api/post-comments/${rootId}/replies/cursor`, {
+    params: { cursor, size }
+  })
+}
+
+// 发表帖子评论/回复
+export const createPostComment = (data) => {
+  return apiClient.post('/api/post-comments', data)
+}
+
+// 删除帖子评论
+export const deletePostComment = (commentId) => {
+  return apiClient.delete(`/api/post-comments/${commentId}`)
+}
+
 export default apiClient
