@@ -496,7 +496,8 @@ onMounted(() => {
 }
 
 .reply-footer {
-  padding-left: 2.5rem;
+  display: flex;
+  /* padding-left: 0rem; */
 }
 
 .load-more-replies {
